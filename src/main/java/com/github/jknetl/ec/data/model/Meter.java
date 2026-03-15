@@ -17,6 +17,9 @@ public class Meter {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
+	@ManyToOne(optional = false)
+	private Tenant tenant;
+
 	@Enumerated(EnumType.STRING)
 	private EnergyType type;
 

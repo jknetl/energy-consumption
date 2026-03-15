@@ -18,6 +18,9 @@ public class MeterReading {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
+	@ManyToOne(optional = false)
+	private Tenant tenant;
+
 	@NotNull
 	private BigDecimal value;
 
