@@ -16,15 +16,14 @@ This is a web application that stores and visualizes energy consumption data.
 
 ## Running locally
 
-1. create a `.env` file with the following content:
-        ```
-        PGUSER=YOUR_DB_USER
-        PGPASSWORD=YOUR_DB_PASSWORD
-        ```
+1. Copy the `.env.example` to `.env` and set your credentials
 2. run the database with docker compose
-        ```
-        docker compose up -d
-        ```
+    ```
+    docker compose up -d
+    ```
 3. configure the run configuration in your IDE to
    - use `local` Spring profile
    - set the environment variables from the `.env` file
+4. from terminal
+   - load variables from the `.env` file
+   - run ` ./gradlew bootRun --args='--spring.profiles.active=local'`
