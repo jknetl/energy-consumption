@@ -41,10 +41,14 @@ dependencies {
 	compileOnly("org.projectlombok:lombok:1.18.44")
 	runtimeOnly 'org.postgresql:postgresql'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testRuntimeOnly 'com.h2database:h2'
+	testImplementation 'org.mockito:mockito-core'
+	testImplementation 'org.mockito:mockito-junit-jupiter'
+	testImplementation 'org.assertj:assertj-core'
 
 	testAnnotationProcessor("org.projectlombok:lombok:1.18.44")
 	testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"

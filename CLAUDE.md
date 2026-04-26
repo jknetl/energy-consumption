@@ -58,3 +58,16 @@ Notable mapper quirks:
 - Java 25 toolchain (Temurin in CI)
 - Jib plugin for Docker images — target image: `jknetl/energy-consumption`
 - Lombok + MapStruct annotation processors both configured in `build.gradle`
+
+## Testing Conventions
+
+**Naming pattern:** `methodName_whenCondition_shouldExpectedBehavior`
+
+Examples:
+- `create_whenEntityHasId_shouldThrowRuntimeException`
+- `findAll_whenTenantHasLocations_shouldReturnOnlyTenantLocations`
+- `getAll_whenNoLocations_shouldReturn200WithEmptyList`
+
+**Arrange/Act/Assert:** Separate the three blocks with a blank line. Do NOT write `// Arrange`, `// Act`, or `// Assert` comments.
+
+**Parameterized tests:** Use `@EnumSource` for enum variants, `@ValueSource` for primitives/strings.
