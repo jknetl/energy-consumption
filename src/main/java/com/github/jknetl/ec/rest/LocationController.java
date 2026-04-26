@@ -54,7 +54,7 @@ public class LocationController {
 		locationService.update(UNIMPLEMENTED_TENANT_ID, location);
 	}
 
-	@DeleteMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@DeleteMapping(path = "/{id}")
 	public void delete(@PathVariable Long id) {
 		locationService.deleteById(UNIMPLEMENTED_TENANT_ID, id);
 	}

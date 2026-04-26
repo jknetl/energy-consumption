@@ -53,7 +53,7 @@ public class MeterController {
         meterService.update(UNIMPLEMENTED_TENANT_ID, meter);
     }
 
-    @DeleteMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(path = "/{id}")
     public void delete(@PathVariable Long id) {
         meterService.deleteById(UNIMPLEMENTED_TENANT_ID, id);
     }
