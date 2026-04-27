@@ -21,6 +21,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ./gradlew jibDockerBuild
 ```
 
+## API Collection
+
+A [Bruno](https://www.usebruno.com/) collection lives in `bruno-collection/`. Open it in the Bruno desktop app, select the **local** environment, and issue requests against a running instance. See `bruno-collection/README.md` for details.
+
 ## Local Development Setup
 
 1. Copy `.env.example` to `.env` and fill in `PGUSER` / `PGPASSWORD`
