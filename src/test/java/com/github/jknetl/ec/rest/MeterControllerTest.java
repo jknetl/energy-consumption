@@ -84,13 +84,13 @@ class MeterControllerTest {
     @Test
     void add_whenValidRequest_shouldReturn201() throws Exception {
         when(meterMapper.map(any(), any(), any())).thenReturn(new Meter());
-        when(meterService.create(any(), any())).thenReturn(new Meter());
+        when(meterService.create(any(), any(), any())).thenReturn(new Meter());
 
         mockMvc.perform(post(BASE_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validRequest())))
                 .andExpect(status().isCreated());
-        verify(meterService).create(any(), any());
+        verify(meterService).create(any(), any(), any());
     }
 
     @Test
@@ -117,7 +117,7 @@ class MeterControllerTest {
     @EnumSource(EnergyType.class)
     void add_forAllEnergyTypes_shouldReturn201(EnergyType type) throws Exception {
         when(meterMapper.map(any(), any(), any())).thenReturn(new Meter());
-        when(meterService.create(any(), any())).thenReturn(new Meter());
+        when(meterService.create(any(), any(), any())).thenReturn(new Meter());
 
         mockMvc.perform(post(BASE_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -128,13 +128,13 @@ class MeterControllerTest {
     @Test
     void update_whenValidRequest_shouldReturn200() throws Exception {
         when(meterMapper.map(any(), any(), any())).thenReturn(new Meter());
-        when(meterService.update(any(), any())).thenReturn(new Meter());
+        when(meterService.update(any(), any(), any())).thenReturn(new Meter());
 
         mockMvc.perform(put(BASE_PATH + "/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validRequest())))
                 .andExpect(status().isOk());
-        verify(meterService).update(any(), any());
+        verify(meterService).update(any(), any(), any());
     }
 
     @Test

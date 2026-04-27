@@ -68,7 +68,7 @@ class MeterServiceTest {
         Meter saved = TestEntityFactory.createSavedMeter(tenant, location);
         when(repository.save(meter)).thenReturn(saved);
 
-        Meter result = meterService.create(TENANT_ID, meter);
+        Meter result = meterService.create(TENANT_ID, location.getId(), meter);
 
         assertThat(result).isEqualTo(saved);
         verify(repository).save(meter);
@@ -80,7 +80,7 @@ class MeterServiceTest {
         Location location = TestEntityFactory.createSavedLocation(tenant);
         Meter meter = TestEntityFactory.createSavedMeter(tenant, location);
 
-        assertThatThrownBy(() -> meterService.create(TENANT_ID, meter))
+        assertThatThrownBy(() -> meterService.create(TENANT_ID, location.getId(), meter))
                 .isInstanceOf(RuntimeException.class);
         verify(repository, never()).save(any());
     }
@@ -93,7 +93,7 @@ class MeterServiceTest {
         when(repository.existsById(1L)).thenReturn(true);
         when(repository.save(meter)).thenReturn(meter);
 
-        Meter result = meterService.update(TENANT_ID, meter);
+        Meter result = meterService.update(TENANT_ID, location.getId(), meter);
 
         assertThat(result).isEqualTo(meter);
         verify(repository).save(meter);
@@ -106,7 +106,7 @@ class MeterServiceTest {
         Meter meter = TestEntityFactory.createSavedMeter(tenant, location);
         when(repository.existsById(1L)).thenReturn(false);
 
-        assertThatThrownBy(() -> meterService.update(TENANT_ID, meter))
+        assertThatThrownBy(() -> meterService.update(TENANT_ID, location.getId(), meter))
                 .isInstanceOf(EntityNotFoundException.class);
         verify(repository, never()).save(any());
     }
@@ -117,7 +117,7 @@ class MeterServiceTest {
         Location location = TestEntityFactory.createSavedLocation(tenant);
         Meter meter = TestEntityFactory.createMeter(tenant, location);
 
-        assertThatThrownBy(() -> meterService.update(TENANT_ID, meter))
+        assertThatThrownBy(() -> meterService.update(TENANT_ID, location.getId(), meter))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
@@ -139,7 +139,7 @@ class MeterServiceTest {
         saved.setType(type);
         when(repository.save(meter)).thenReturn(saved);
 
-        Meter result = meterService.create(TENANT_ID, meter);
+        Meter result = meterService.create(TENANT_ID, location.getId(), meter);
 
         assertThat(result.getType()).isEqualTo(type);
     }
