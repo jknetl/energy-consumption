@@ -12,7 +12,7 @@ import lombok.Data;
 
 @Data
 @Entity
-public class MeterReading {
+public class MeterReading implements TenantScopedEntity{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
