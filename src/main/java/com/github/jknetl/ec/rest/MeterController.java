@@ -44,13 +44,13 @@ public class MeterController {
     @ResponseStatus(HttpStatus.CREATED)
     public void add(@Valid @RequestBody MeterRequest meterRequest) {
         var meter = mapper.map(Tenant.UNIMPLEMENTED_TENANCY_TENANT, null, meterRequest);
-        meterService.create(UNIMPLEMENTED_TENANT_ID, meter);
+        meterService.create(UNIMPLEMENTED_TENANT_ID, meterRequest.locationId(), meter);
     }
 
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void update(@PathVariable Long id, @Valid @RequestBody MeterRequest meterRequest) {
         var meter = mapper.map(Tenant.UNIMPLEMENTED_TENANCY_TENANT, id, meterRequest);
-        meterService.update(UNIMPLEMENTED_TENANT_ID, meter);
+        meterService.update(UNIMPLEMENTED_TENANT_ID, meterRequest.locationId(), meter);
     }
 
     @DeleteMapping(path = "/{id}")

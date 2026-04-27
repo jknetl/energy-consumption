@@ -3,8 +3,10 @@ package com.github.jknetl.ec.service;
 import com.github.jknetl.ec.data.model.Meter;
 import com.github.jknetl.ec.data.model.Meter;
 import com.github.jknetl.ec.data.model.Meter;
+import com.github.jknetl.ec.data.repository.LocationRepository;
 import com.github.jknetl.ec.data.repository.MeterRepository;
 import com.github.jknetl.ec.data.repository.MeterRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,7 @@ import static com.github.jknetl.ec.service.utils.ServiceUtils.verifyEntityHasNoI
 public class MeterService {
 
     private final MeterRepository repository;
+    private final LocationRepository locationRepository;
 
     public Optional<Meter> findById(UUID TenantId, Long id) {
         return repository.findById(id);
@@ -32,14 +35,22 @@ public class MeterService {
     }
 
     @Transactional
-    public Meter create(UUID TenantId, Meter meter){
+    public Meter create(UUID TenantId, Long locationId, Meter meter){
         verifyEntityHasNoId(meter);
+        var location = locationRepository.findById(locationId)
+                .orElseThrow(() -> new EntityNotFoundException("Location not found: " + locationId));
+
+        meter.setLocation(location);
         return repository.save(meter);
     }
 
     @Transactional
-    public Meter update(UUID TenantId, Meter meter) {
+    public Meter update(UUID TenantId, Long locationId, Meter meter) {
         verifyEntityExists(meter, repository);
+        var location = locationRepository.findById(locationId)
+                .orElseThrow(() -> new EntityNotFoundException("Location not found: " + locationId));
+
+        meter.setLocation(location);
         return repository.save(meter);
     }
 
