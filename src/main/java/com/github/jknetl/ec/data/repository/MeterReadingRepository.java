@@ -1,7 +1,13 @@
 package com.github.jknetl.ec.data.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import com.github.jknetl.ec.data.model.MeterReading;
 
-public interface MeterReadingRepository extends JpaRepository<MeterReading, Long> {}
+import java.util.List;
+
+@Repository
+public interface MeterReadingRepository extends TenantAwareJpaRepository<MeterReading, Long> {
+
+    List<MeterReading> findAllByMeterId(Long meterId);
+}

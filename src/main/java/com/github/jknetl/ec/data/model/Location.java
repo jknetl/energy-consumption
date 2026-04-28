@@ -12,7 +12,7 @@ import lombok.Data;
 
 @Data
 @Entity
-public class Location {
+public class Location implements TenantScopedEntity{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -37,5 +37,5 @@ public class Location {
 
 	@NotNull
 	@Length(min = 3, max = 3)
-	private String country;
+	private String countryCode;
 }

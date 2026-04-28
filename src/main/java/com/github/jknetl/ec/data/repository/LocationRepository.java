@@ -1,7 +1,12 @@
 package com.github.jknetl.ec.data.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import com.github.jknetl.ec.data.model.Location;
 
-public interface LocationRepository extends JpaRepository<Location, Long> {}
+import java.util.Optional;
+
+@Repository
+public interface LocationRepository extends TenantAwareJpaRepository<Location, Long> {
+    Optional<Location> findByStreetAndStreetNumberAndCity(String street, Integer streetNumber, String city);
+}

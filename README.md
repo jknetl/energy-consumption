@@ -14,6 +14,10 @@ This is a web application that stores and visualizes energy consumption data.
 ./gradlew jib 
 ```
 
+## API Collection (Bruno)
+
+A [Bruno](https://www.usebruno.com/) collection for manually exploring the REST API is located in [`bruno-collection/`](bruno-collection/). Open that folder in the Bruno desktop app, select the **local** environment, and run requests against a locally running instance.
+
 ## Running locally
 
 1. Copy the `.env.example` to `.env` and set your credentials
