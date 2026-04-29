@@ -17,10 +17,6 @@ import java.util.UUID;
 @NoArgsConstructor
 public class Tenant {
 
-    // TODO: remove after controllers are wired up
-    public static UUID UNIMPLEMENTED_TENANT_ID = UUID.fromString("ec407ae7-bbfb-4d2a-a788-517be9e5b13c");
-    public static Tenant UNIMPLEMENTED_TENANCY_TENANT = new Tenant(UNIMPLEMENTED_TENANT_ID, "UNIMPLEMENTED", Instant.now());
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;

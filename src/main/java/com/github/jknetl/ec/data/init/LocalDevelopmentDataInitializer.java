@@ -20,11 +20,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 @Component
 @Profile("local")
 @RequiredArgsConstructor
 public class LocalDevelopmentDataInitializer implements ApplicationRunner {
+
+    private static final UUID TENANT_ID = UUID.fromString("ec407ae7-bbfb-4d2a-a788-517be9e5b13c");
+    private static final String TENANT_NAME = "UNIMPLEMENTED";
 
     private final JdbcTemplate jdbcTemplate;
     private final TenantRepository tenantRepository;
@@ -44,9 +48,9 @@ public class LocalDevelopmentDataInitializer implements ApplicationRunner {
     private Tenant initTenant() {
         jdbcTemplate.update(
             "INSERT INTO tenant (id, name) VALUES (?, ?) ON CONFLICT (id) DO NOTHING",
-            Tenant.UNIMPLEMENTED_TENANT_ID, "UNIMPLEMENTED"
+            TENANT_ID, TENANT_NAME
         );
-        return tenantRepository.findById(Tenant.UNIMPLEMENTED_TENANT_ID).orElseThrow();
+        return tenantRepository.findById(TENANT_ID).orElseThrow();
     }
 
     private List<Location> initLocations(Tenant tenant) {
