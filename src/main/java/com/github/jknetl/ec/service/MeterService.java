@@ -26,16 +26,17 @@ public class MeterService {
     private final MeterRepository repository;
     private final LocationRepository locationRepository;
 
-    public Optional<Meter> findById(UUID TenantId, Long id) {
-        return repository.findById(id);
+    public Optional<Meter> findById(UUID tenantId, Long id) {
+        return repository.findById(id)
+                .filter(m -> m.getTenant().getId().equals(tenantId));
     }
 
-    public List<Meter> findAll(UUID TenantId) {
-        return repository.findAll();
+    public List<Meter> findAll(UUID tenantId) {
+        return repository.findAllByTenantId(tenantId);
     }
 
     @Transactional
-    public Meter create(UUID TenantId, Long locationId, Meter meter){
+    public Meter create(UUID tenantId, Long locationId, Meter meter){
         verifyEntityHasNoId(meter);
         var location = locationRepository.findById(locationId)
                 .orElseThrow(() -> new EntityNotFoundException("Location not found: " + locationId));
@@ -45,7 +46,7 @@ public class MeterService {
     }
 
     @Transactional
-    public Meter update(UUID TenantId, Long locationId, Meter meter) {
+    public Meter update(UUID tenantId, Long locationId, Meter meter) {
         verifyEntityExists(meter, repository);
         var location = locationRepository.findById(locationId)
                 .orElseThrow(() -> new EntityNotFoundException("Location not found: " + locationId));
@@ -55,7 +56,7 @@ public class MeterService {
     }
 
     @Transactional
-    public void deleteById(UUID TenantId, Long id) {
+    public void deleteById(UUID tenantId, Long id) {
         repository.deleteById(id);
 
     }

@@ -27,28 +27,29 @@ public class LocationService {
 
 	private final LocationRepository repository;
 
-	public Optional<Location> findById(UUID TenantId, Long id) {
-		return repository.findById(id);
+	public Optional<Location> findById(UUID tenantId, Long id) {
+		return repository.findById(id)
+				.filter(loc -> loc.getTenant().getId().equals(tenantId));
 	}
 
-	public List<Location> findAll(UUID TenantId) {
-		return repository.findAll();
+	public List<Location> findAll(UUID tenantId) {
+		return repository.findAllByTenantId(tenantId);
 	}
 
 	@Transactional
-	public Location create(UUID TenantId, Location location){
+	public Location create(UUID tenantId, Location location){
 		verifyEntityHasNoId(location);
 		return repository.save(location);
 	}
 
 	@Transactional
-	public Location update(UUID TenantId, Location location) {
+	public Location update(UUID tenantId, Location location) {
 		verifyEntityExists(location, repository);
 		return repository.save(location);
 	}
 
 	@Transactional
-	public void deleteById(UUID TenantId, Long id) {
+	public void deleteById(UUID tenantId, Long id) {
 		repository.deleteById(id);
 
 	}

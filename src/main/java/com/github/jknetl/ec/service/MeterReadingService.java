@@ -22,16 +22,17 @@ public class MeterReadingService{
 	private final MeterReadingRepository repository;
 	private final MeterRepository meterRepository;
 
-	public Optional<MeterReading> findById(UUID TenantId, Long id) {
-		return repository.findById(id);
+	public Optional<MeterReading> findById(UUID tenantId, Long id) {
+		return repository.findById(id)
+				.filter(r -> r.getTenant().getId().equals(tenantId));
 	}
 
-	public List<MeterReading> findAll(UUID TenantId, Long meterId) {
+	public List<MeterReading> findAll(UUID tenantId, Long meterId) {
 		return repository.findAllByMeterId(meterId);
 	}
 
 	@Transactional
-	public MeterReading create(UUID TenantId, Long meterId, MeterReading meterReading) {
+	public MeterReading create(UUID tenantId, Long meterId, MeterReading meterReading) {
 		verifyEntityHasNoId(meterReading);
 		var meter = meterRepository.findById(meterId)
 				.orElseThrow(() -> new EntityNotFoundException("Meter not found: " + meterId));
@@ -40,7 +41,7 @@ public class MeterReadingService{
 	}
 
 	@Transactional
-	public MeterReading update(UUID TenantId, Long meterId, MeterReading meterReading) {
+	public MeterReading update(UUID tenantId, Long meterId, MeterReading meterReading) {
 		verifyEntityExists(meterReading, repository);
 		var meter = meterRepository.findById(meterId)
 				.orElseThrow(() -> new EntityNotFoundException("Meter not found: " + meterId));
@@ -49,7 +50,7 @@ public class MeterReadingService{
 	}
 
 	@Transactional
-	public void deleteById(UUID TenantId, Long id) {
+	public void deleteById(UUID tenantId, Long id) {
 		repository.deleteById(id);
 
 	}
