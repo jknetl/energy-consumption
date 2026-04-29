@@ -1,11 +1,7 @@
 package com.github.jknetl.ec.service;
 
-import com.github.jknetl.ec.data.model.TenantScopedEntity;
-import com.github.jknetl.ec.service.utils.ServiceUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
 import com.github.jknetl.ec.data.model.Location;
@@ -17,7 +13,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.github.jknetl.ec.service.utils.ServiceUtils.verifyEntityExists;
 import static com.github.jknetl.ec.service.utils.ServiceUtils.verifyEntityHasNoId;
 
 @Service
@@ -44,13 +39,15 @@ public class LocationService {
 
 	@Transactional
 	public Location update(UUID tenantId, Location location) {
-		verifyEntityExists(location, repository);
+		findById(tenantId, location.getId())
+				.orElseThrow(() -> new EntityNotFoundException("Location not found: " + location.getId()));
 		return repository.save(location);
 	}
 
 	@Transactional
 	public void deleteById(UUID tenantId, Long id) {
+		findById(tenantId, id)
+				.orElseThrow(() -> new EntityNotFoundException("Location not found: " + id));
 		repository.deleteById(id);
-
 	}
 }

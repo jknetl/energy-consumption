@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.github.jknetl.ec.service.utils.ServiceUtils.verifyEntityExists;
 import static com.github.jknetl.ec.service.utils.ServiceUtils.verifyEntityHasNoId;
 
 @Service
@@ -42,7 +41,8 @@ public class MeterReadingService{
 
 	@Transactional
 	public MeterReading update(UUID tenantId, Long meterId, MeterReading meterReading) {
-		verifyEntityExists(meterReading, repository);
+		findById(tenantId, meterReading.getId())
+				.orElseThrow(() -> new EntityNotFoundException("MeterReading not found: " + meterReading.getId()));
 		var meter = meterRepository.findById(meterId)
 				.orElseThrow(() -> new EntityNotFoundException("Meter not found: " + meterId));
 		meterReading.setMeter(meter);
@@ -51,7 +51,8 @@ public class MeterReadingService{
 
 	@Transactional
 	public void deleteById(UUID tenantId, Long id) {
+		findById(tenantId, id)
+				.orElseThrow(() -> new EntityNotFoundException("MeterReading not found: " + id));
 		repository.deleteById(id);
-
 	}
 }

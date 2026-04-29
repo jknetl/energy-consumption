@@ -1,10 +1,7 @@
 package com.github.jknetl.ec.service;
 
 import com.github.jknetl.ec.data.model.Meter;
-import com.github.jknetl.ec.data.model.Meter;
-import com.github.jknetl.ec.data.model.Meter;
 import com.github.jknetl.ec.data.repository.LocationRepository;
-import com.github.jknetl.ec.data.repository.MeterRepository;
 import com.github.jknetl.ec.data.repository.MeterRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +12,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.github.jknetl.ec.service.utils.ServiceUtils.verifyEntityExists;
 import static com.github.jknetl.ec.service.utils.ServiceUtils.verifyEntityHasNoId;
 
 @Service
@@ -47,7 +43,8 @@ public class MeterService {
 
     @Transactional
     public Meter update(UUID tenantId, Long locationId, Meter meter) {
-        verifyEntityExists(meter, repository);
+        findById(tenantId, meter.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Meter not found: " + meter.getId()));
         var location = locationRepository.findById(locationId)
                 .orElseThrow(() -> new EntityNotFoundException("Location not found: " + locationId));
 
@@ -57,7 +54,8 @@ public class MeterService {
 
     @Transactional
     public void deleteById(UUID tenantId, Long id) {
+        findById(tenantId, id)
+                .orElseThrow(() -> new EntityNotFoundException("Meter not found: " + id));
         repository.deleteById(id);
-
     }
 }
