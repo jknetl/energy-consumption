@@ -1,33 +1,41 @@
 package com.github.jknetl.ec.data.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.validator.constraints.Length;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
+@Table(name = "app_user")
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-public class Tenant {
-
-    // TODO: remove after controllers are wired up
-    public static UUID UNIMPLEMENTED_TENANT_ID = UUID.fromString("ec407ae7-bbfb-4d2a-a788-517be9e5b13c");
-    public static Tenant UNIMPLEMENTED_TENANCY_TENANT = new Tenant(UNIMPLEMENTED_TENANT_ID, "UNIMPLEMENTED", Instant.now());
+public class AppUser {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Length(max = 100)
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
+    @JoinColumn(name = "tenant_id", nullable = false)
+    private Tenant tenant;
+
+    @Column(nullable = false, unique = true)
+    private String email;
+
     @Column(nullable = false)
-    private String name;
+    private String passwordHash;
+
+    private String displayName;
+
+    @Column(nullable = false)
+    private String role = "USER";
+
+    @Column(nullable = false)
+    private boolean isActive = true;
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt;

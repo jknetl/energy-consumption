@@ -13,11 +13,11 @@ public class TestEntityFactory {
     public static final UUID TENANT_B_ID = UUID.fromString("22222222-0000-0000-0000-000000000002");
 
     public static Tenant createTenantA() {
-        return new Tenant(TENANT_A_ID, "Tenant A");
+        return new Tenant(TENANT_A_ID, "Tenant A", null);
     }
 
     public static Tenant createTenantB() {
-        return new Tenant(TENANT_B_ID, "Tenant B");
+        return new Tenant(TENANT_B_ID, "Tenant B", null);
     }
 
     public static Location createLocation(Tenant tenant) {

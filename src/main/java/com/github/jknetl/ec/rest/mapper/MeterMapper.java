@@ -14,6 +14,7 @@ import java.util.List;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface MeterMapper {
 
+    @Mapping(target = "id", source = "id")
     Meter map(Tenant tenant, Long id, MeterRequest meterRequest);
 
     @Mapping(target = "locationId", source = "location.id")
