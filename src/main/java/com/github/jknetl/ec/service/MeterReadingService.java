@@ -36,7 +36,7 @@ public class MeterReadingService {
 	@Transactional
 	public MeterReading create(UUID tenantId, Long meterId, MeterReading meterReading) {
 		verifyEntityHasNoId(meterReading);
-		var meter = meterRepository.findById(meterId)
+		var meter = meterRepository.findByIdAndTenantId(meterId, tenantId)
 				.orElseThrow(() -> new EntityNotFoundException("Meter not found: " + meterId));
 		meterReading.setMeter(meter);
 		meterReading.setTenant(tenantRepository.getReferenceById(tenantId));
@@ -47,7 +47,7 @@ public class MeterReadingService {
 	public MeterReading update(UUID tenantId, Long meterId, MeterReading meterReading) {
 		findById(tenantId, meterReading.getId())
 				.orElseThrow(() -> new EntityNotFoundException("MeterReading not found: " + meterReading.getId()));
-		var meter = meterRepository.findById(meterId)
+		var meter = meterRepository.findByIdAndTenantId(meterId, tenantId)
 				.orElseThrow(() -> new EntityNotFoundException("Meter not found: " + meterId));
 		meterReading.setMeter(meter);
 		meterReading.setTenant(tenantRepository.getReferenceById(tenantId));
