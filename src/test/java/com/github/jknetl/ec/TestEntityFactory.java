@@ -65,4 +65,14 @@ public class TestEntityFactory {
         mr.setId(1L);
         return mr;
     }
+
+    public static AppUser createAppUser(Tenant tenant) {
+        AppUser user = new AppUser();
+        user.setId(UUID.randomUUID());
+        user.setEmail("user@test.com");
+        user.setPasswordHash("$2a$10$hash");
+        user.setRole("USER");
+        user.setTenant(tenant);
+        return user;
+    }
 }

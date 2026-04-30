@@ -54,7 +54,7 @@ class LocationServiceTest {
         List<Location> locations = List.of(
                 TestEntityFactory.createSavedLocation(tenant),
                 TestEntityFactory.createSavedLocation(tenant));
-        when(repository.findAll()).thenReturn(locations);
+        when(repository.findAllByTenantId(TENANT_ID)).thenReturn(locations);
 
         List<Location> result = locationService.findAll(TENANT_ID);
 
@@ -89,7 +89,7 @@ class LocationServiceTest {
     void update_whenLocationExists_shouldSaveAndReturnLocation() {
         Tenant tenant = TestEntityFactory.createTenantA();
         Location location = TestEntityFactory.createSavedLocation(tenant);
-        when(repository.existsById(1L)).thenReturn(true);
+        when(repository.findById(1L)).thenReturn(Optional.of(location));
         when(repository.save(location)).thenReturn(location);
 
         Location result = locationService.update(TENANT_ID, location);
@@ -102,11 +102,10 @@ class LocationServiceTest {
     void update_whenLocationDoesNotExist_shouldThrowEntityNotFoundException() {
         Tenant tenant = TestEntityFactory.createTenantA();
         Location location = TestEntityFactory.createSavedLocation(tenant);
-        when(repository.existsById(1L)).thenReturn(false);
+        when(repository.findById(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> locationService.update(TENANT_ID, location))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Such entity doesn't exist");
+                .isInstanceOf(EntityNotFoundException.class);
         verify(repository, never()).save(any());
     }
 
@@ -116,12 +115,15 @@ class LocationServiceTest {
         Location location = TestEntityFactory.createLocation(tenant);
 
         assertThatThrownBy(() -> locationService.update(TENANT_ID, location))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Such entity doesn't exist");
+                .isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
     void deleteById_shouldCallRepositoryDeleteById() {
+        Tenant tenant = TestEntityFactory.createTenantA();
+        Location location = TestEntityFactory.createSavedLocation(tenant);
+        when(repository.findById(1L)).thenReturn(Optional.of(location));
+
         locationService.deleteById(TENANT_ID, 1L);
 
         verify(repository).deleteById(1L);

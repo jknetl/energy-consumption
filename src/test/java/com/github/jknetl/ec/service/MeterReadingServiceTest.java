@@ -118,7 +118,7 @@ class MeterReadingServiceTest {
         Location location = TestEntityFactory.createSavedLocation(tenant);
         Meter meter = TestEntityFactory.createSavedMeter(tenant, location);
         MeterReading reading = TestEntityFactory.createSavedMeterReading(tenant, meter);
-        when(repository.existsById(1L)).thenReturn(true);
+        when(repository.findById(1L)).thenReturn(Optional.of(reading));
         when(meterRepository.findById(METER_ID)).thenReturn(Optional.of(meter));
         when(repository.save(reading)).thenReturn(reading);
 
@@ -145,7 +145,7 @@ class MeterReadingServiceTest {
         Location location = TestEntityFactory.createSavedLocation(tenant);
         Meter meter = TestEntityFactory.createSavedMeter(tenant, location);
         MeterReading reading = TestEntityFactory.createSavedMeterReading(tenant, meter);
-        when(repository.existsById(1L)).thenReturn(false);
+        when(repository.findById(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> meterReadingService.update(TENANT_ID, METER_ID, reading))
                 .isInstanceOf(EntityNotFoundException.class);
@@ -159,7 +159,7 @@ class MeterReadingServiceTest {
         Location location = TestEntityFactory.createSavedLocation(tenant);
         Meter meter = TestEntityFactory.createSavedMeter(tenant, location);
         MeterReading reading = TestEntityFactory.createSavedMeterReading(tenant, meter);
-        when(repository.existsById(1L)).thenReturn(true);
+        when(repository.findById(1L)).thenReturn(Optional.of(reading));
         when(meterRepository.findById(METER_ID)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> meterReadingService.update(TENANT_ID, METER_ID, reading))
@@ -170,6 +170,12 @@ class MeterReadingServiceTest {
 
     @Test
     void deleteById_shouldCallRepositoryDeleteById() {
+        Tenant tenant = TestEntityFactory.createTenantA();
+        Location location = TestEntityFactory.createSavedLocation(tenant);
+        Meter meter = TestEntityFactory.createSavedMeter(tenant, location);
+        MeterReading reading = TestEntityFactory.createSavedMeterReading(tenant, meter);
+        when(repository.findById(1L)).thenReturn(Optional.of(reading));
+
         meterReadingService.deleteById(TENANT_ID, 1L);
 
         verify(repository).deleteById(1L);

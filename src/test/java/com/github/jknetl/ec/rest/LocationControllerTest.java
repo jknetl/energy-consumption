@@ -4,13 +4,18 @@ import tools.jackson.databind.ObjectMapper;
 import com.github.jknetl.ec.data.model.Location;
 import com.github.jknetl.ec.rest.dto.LocationRequest;
 import com.github.jknetl.ec.rest.dto.LocationResponse;
+import com.github.jknetl.ec.data.repository.AppUserRepository;
 import com.github.jknetl.ec.rest.mapper.LocationMapper;
+import com.github.jknetl.ec.security.AppUserDetails;
+import com.github.jknetl.ec.security.JwtService;
+import com.github.jknetl.ec.security.SecurityConfig;
 import com.github.jknetl.ec.service.LocationService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -18,25 +23,35 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.Optional;
 
+import static com.github.jknetl.ec.TestEntityFactory.createAppUser;
+import static com.github.jknetl.ec.TestEntityFactory.createTenantA;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(LocationController.class)
+@Import(SecurityConfig.class)
 class LocationControllerTest {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
     @MockitoBean private LocationService locationService;
     @MockitoBean private LocationMapper locationMapper;
+    @MockitoBean private JwtService jwtService;
+    @MockitoBean private AppUserRepository appUserRepository;
 
     private static final String BASE_PATH = "/api/locations";
 
     private LocationRequest validRequest() {
         return new LocationRequest("Main Street", 1, 10000, "Prague", "CZE");
+    }
+
+    private AppUserDetails testUser() {
+        return new AppUserDetails(createAppUser(createTenantA()));
     }
 
     @Test
@@ -45,7 +60,7 @@ class LocationControllerTest {
         when(locationService.findAll(any())).thenReturn(List.of());
         when(locationMapper.map(any(List.class))).thenReturn(List.of(response));
 
-        mockMvc.perform(get(BASE_PATH))
+        mockMvc.perform(get(BASE_PATH).with(user(testUser())))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$[0].id").value(1))
@@ -57,9 +72,15 @@ class LocationControllerTest {
         when(locationService.findAll(any())).thenReturn(List.of());
         when(locationMapper.map(any(List.class))).thenReturn(List.of());
 
-        mockMvc.perform(get(BASE_PATH))
+        mockMvc.perform(get(BASE_PATH).with(user(testUser())))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[]"));
+    }
+
+    @Test
+    void getAll_whenUnauthenticated_shouldReturn401() throws Exception {
+        mockMvc.perform(get(BASE_PATH))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -68,7 +89,7 @@ class LocationControllerTest {
         when(locationService.findById(any(), eq(1L))).thenReturn(Optional.of(new Location()));
         when(locationMapper.map(any(Location.class))).thenReturn(response);
 
-        mockMvc.perform(get(BASE_PATH + "/1"))
+        mockMvc.perform(get(BASE_PATH + "/1").with(user(testUser())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.countryCode").value("CZE"));
@@ -78,7 +99,7 @@ class LocationControllerTest {
     void get_whenLocationDoesNotExist_shouldReturn200WithNullBody() throws Exception {
         when(locationService.findById(any(), eq(99L))).thenReturn(Optional.empty());
 
-        mockMvc.perform(get(BASE_PATH + "/99"))
+        mockMvc.perform(get(BASE_PATH + "/99").with(user(testUser())))
                 .andExpect(status().isOk());
     }
 
@@ -88,6 +109,7 @@ class LocationControllerTest {
         when(locationService.create(any(), any())).thenReturn(new Location());
 
         mockMvc.perform(post(BASE_PATH)
+                        .with(user(testUser()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validRequest())))
                 .andExpect(status().isCreated());
@@ -99,6 +121,7 @@ class LocationControllerTest {
         LocationRequest invalidRequest = new LocationRequest(null, 1, 10000, "Prague", "CZE");
 
         mockMvc.perform(post(BASE_PATH)
+                        .with(user(testUser()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
@@ -109,6 +132,7 @@ class LocationControllerTest {
         LocationRequest invalidRequest = new LocationRequest("Main Street", 1, 10000, null, "CZE");
 
         mockMvc.perform(post(BASE_PATH)
+                        .with(user(testUser()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
@@ -120,6 +144,7 @@ class LocationControllerTest {
         LocationRequest invalidRequest = new LocationRequest("Main Street", 1, 10000, "Prague", countryCode);
 
         mockMvc.perform(post(BASE_PATH)
+                        .with(user(testUser()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
@@ -131,6 +156,7 @@ class LocationControllerTest {
         when(locationService.update(any(), any())).thenReturn(new Location());
 
         mockMvc.perform(put(BASE_PATH + "/1")
+                        .with(user(testUser()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validRequest())))
                 .andExpect(status().isOk());
@@ -142,6 +168,7 @@ class LocationControllerTest {
         LocationRequest invalidRequest = new LocationRequest(null, 1, 10000, "Prague", "CZE");
 
         mockMvc.perform(put(BASE_PATH + "/1")
+                        .with(user(testUser()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
@@ -151,7 +178,7 @@ class LocationControllerTest {
     void delete_whenCalled_shouldReturn200() throws Exception {
         // DELETE with no Content-Type is correct REST behavior.
         // Will return 415 if the endpoint still has consumes = APPLICATION_JSON_VALUE — that's the production bug.
-        mockMvc.perform(delete(BASE_PATH + "/1"))
+        mockMvc.perform(delete(BASE_PATH + "/1").with(user(testUser())))
                 .andExpect(status().isOk());
         verify(locationService).deleteById(any(), eq(1L));
     }
