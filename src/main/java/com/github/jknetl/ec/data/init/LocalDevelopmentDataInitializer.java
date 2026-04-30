@@ -1,56 +1,61 @@
 package com.github.jknetl.ec.data.init;
 
-import com.github.jknetl.ec.data.model.EnergyType;
-import com.github.jknetl.ec.data.model.EnergyUnit;
-import com.github.jknetl.ec.data.model.Location;
-import com.github.jknetl.ec.data.model.Meter;
-import com.github.jknetl.ec.data.model.MeterReading;
-import com.github.jknetl.ec.data.model.Tenant;
-import com.github.jknetl.ec.data.repository.LocationRepository;
-import com.github.jknetl.ec.data.repository.MeterReadingRepository;
-import com.github.jknetl.ec.data.repository.MeterRepository;
-import com.github.jknetl.ec.data.repository.TenantRepository;
+import com.github.jknetl.ec.data.model.*;
+import com.github.jknetl.ec.data.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.UUID;
 
 @Component
 @Profile("local")
 @RequiredArgsConstructor
 public class LocalDevelopmentDataInitializer implements ApplicationRunner {
 
-    private static final UUID TENANT_ID = UUID.fromString("ec407ae7-bbfb-4d2a-a788-517be9e5b13c");
-    private static final String TENANT_NAME = "UNIMPLEMENTED";
-
-    private final JdbcTemplate jdbcTemplate;
     private final TenantRepository tenantRepository;
+    private final AppUserRepository userRepository;
     private final LocationRepository locationRepository;
     private final MeterRepository meterRepository;
     private final MeterReadingRepository meterReadingRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-        Tenant tenant = initTenant();
-        List<Location> locations = initLocations(tenant);
-        List<Meter> meters = initMeters(tenant, locations);
-        initReadings(tenant, meters);
+        Tenant tenantA = initTenant("Tenant A");
+        Tenant tenantB = initTenant("Tenant B");
+
+        initUser(tenantA, "user-a@example.com", "password-a");
+        initUser(tenantB, "user-b@example.com", "password-b");
+
+        List<Location> locations = initLocations(tenantA);
+        List<Meter> meters = initMeters(tenantA, locations);
+        initReadings(tenantA, meters);
     }
 
-    private Tenant initTenant() {
-        jdbcTemplate.update(
-            "INSERT INTO tenant (id, name) VALUES (?, ?) ON CONFLICT (id) DO NOTHING",
-            TENANT_ID, TENANT_NAME
-        );
-        return tenantRepository.findById(TENANT_ID).orElseThrow();
+    private Tenant initTenant(String name) {
+        return tenantRepository.findByName(name)
+                .orElseGet(() -> {
+                    Tenant t = new Tenant();
+                    t.setName(name);
+                    return tenantRepository.save(t);
+                });
+    }
+
+    private void initUser(Tenant tenant, String email, String plainPassword) {
+        if (userRepository.findByEmail(email).isPresent()) return;
+        AppUser user = new AppUser();
+        user.setTenant(tenant);
+        user.setEmail(email);
+        user.setPasswordHash(passwordEncoder.encode(plainPassword));
+        user.setDisplayName(email.split("@")[0]);
+        userRepository.save(user);
     }
 
     private List<Location> initLocations(Tenant tenant) {
@@ -86,13 +91,12 @@ public class LocalDevelopmentDataInitializer implements ApplicationRunner {
     private List<Meter> initMeters(Tenant tenant, List<Location> locations) {
         Location prague = locations.get(0);
         Location brno = locations.get(1);
-
-        Meter pragueElec = findOrCreateMeter(tenant, prague, EnergyType.ELECTRICITY);
-        Meter pragueGas  = findOrCreateMeter(tenant, prague, EnergyType.GAS);
-        Meter brnoElec   = findOrCreateMeter(tenant, brno,   EnergyType.ELECTRICITY);
-        Meter brnoGas    = findOrCreateMeter(tenant, brno,   EnergyType.GAS);
-
-        return List.of(pragueElec, pragueGas, brnoElec, brnoGas);
+        return List.of(
+            findOrCreateMeter(tenant, prague, EnergyType.ELECTRICITY),
+            findOrCreateMeter(tenant, prague, EnergyType.GAS),
+            findOrCreateMeter(tenant, brno,   EnergyType.ELECTRICITY),
+            findOrCreateMeter(tenant, brno,   EnergyType.GAS)
+        );
     }
 
     private Meter findOrCreateMeter(Tenant tenant, Location location, EnergyType type) {
@@ -107,30 +111,24 @@ public class LocalDevelopmentDataInitializer implements ApplicationRunner {
     }
 
     private void initReadings(Tenant tenant, List<Meter> meters) {
-        // Prague ELECTRICITY — 14 readings (kWh)
         seedReadings(tenant, meters.get(0), EnergyUnit.KWH, new double[]{
             120.5, 135.2, 98.7, 142.0, 167.3, 88.4, 201.6, 155.9,
             110.2, 178.5, 93.1, 221.4, 145.8, 189.0
         });
-        // Prague GAS — 11 readings (m³)
         seedReadings(tenant, meters.get(1), EnergyUnit.CUBIC_METER, new double[]{
             45.3, 38.7, 52.1, 29.5, 61.8, 44.2, 33.6, 57.9, 41.0, 68.4, 36.2
         });
-        // Brno ELECTRICITY — 18 readings (kWh)
         seedReadings(tenant, meters.get(2), EnergyUnit.KWH, new double[]{
             95.2, 188.4, 147.6, 213.8, 102.5, 176.3, 231.9, 89.7, 165.4,
             198.2, 118.6, 243.1, 155.7, 87.3, 209.5, 134.8, 172.6, 250.0
         });
-        // Brno GAS — 13 readings (m³)
         seedReadings(tenant, meters.get(3), EnergyUnit.CUBIC_METER, new double[]{
             22.4, 54.8, 31.6, 67.3, 18.9, 43.7, 76.2, 28.5, 59.1, 35.8, 72.4, 15.3, 48.9
         });
     }
 
     private void seedReadings(Tenant tenant, Meter meter, EnergyUnit unit, double[] values) {
-        if (!meterReadingRepository.findAllByMeterId(meter.getId()).isEmpty()) {
-            return;
-        }
+        if (!meterReadingRepository.findAllByMeterId(meter.getId()).isEmpty()) return;
         for (double value : values) {
             MeterReading reading = new MeterReading();
             reading.setTenant(tenant);
