@@ -37,7 +37,7 @@ class MeterServiceTest {
         Tenant tenant = TestEntityFactory.createTenantA();
         Location location = TestEntityFactory.createSavedLocation(tenant);
         Meter meter = TestEntityFactory.createSavedMeter(tenant, location);
-        when(repository.findById(1L)).thenReturn(Optional.of(meter));
+        when(repository.findByIdAndTenantId(1L, TENANT_ID)).thenReturn(Optional.of(meter));
 
         Optional<Meter> result = meterService.findById(TENANT_ID, 1L);
 
@@ -46,9 +46,12 @@ class MeterServiceTest {
 
     @Test
     void findById_whenMeterDoesNotExist_shouldReturnEmpty() {
-        when(repository.findById(99L)).thenReturn(Optional.empty());
-
         assertThat(meterService.findById(TENANT_ID, 99L)).isEmpty();
+    }
+
+    @Test
+    void findById_whenIdIsNull_shouldReturnEmpty() {
+        assertThat(meterService.findById(TENANT_ID, null)).isEmpty();
     }
 
     @Test
@@ -106,7 +109,7 @@ class MeterServiceTest {
         Tenant tenant = TestEntityFactory.createTenantA();
         Location location = TestEntityFactory.createSavedLocation(tenant);
         Meter meter = TestEntityFactory.createSavedMeter(tenant, null);
-        when(repository.findById(1L)).thenReturn(Optional.of(meter));
+        when(repository.findByIdAndTenantId(1L, TENANT_ID)).thenReturn(Optional.of(meter));
         when(locationRepository.findById(location.getId())).thenReturn(Optional.of(location));
         when(repository.save(meter)).thenReturn(meter);
 
@@ -121,7 +124,7 @@ class MeterServiceTest {
         Tenant tenant = TestEntityFactory.createTenantA();
         Location location = TestEntityFactory.createSavedLocation(tenant);
         Meter meter = TestEntityFactory.createSavedMeter(tenant, null);
-        when(repository.findById(1L)).thenReturn(Optional.of(meter));
+        when(repository.findByIdAndTenantId(1L, TENANT_ID)).thenReturn(Optional.of(meter));
         when(locationRepository.findById(location.getId())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> meterService.update(TENANT_ID, location.getId(), meter))
@@ -134,7 +137,6 @@ class MeterServiceTest {
         Tenant tenant = TestEntityFactory.createTenantA();
         Location location = TestEntityFactory.createSavedLocation(tenant);
         Meter meter = TestEntityFactory.createSavedMeter(tenant, location);
-        when(repository.findById(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> meterService.update(TENANT_ID, location.getId(), meter))
                 .isInstanceOf(EntityNotFoundException.class);
@@ -156,7 +158,7 @@ class MeterServiceTest {
         Tenant tenant = TestEntityFactory.createTenantA();
         Location location = TestEntityFactory.createSavedLocation(tenant);
         Meter meter = TestEntityFactory.createSavedMeter(tenant, location);
-        when(repository.findById(1L)).thenReturn(Optional.of(meter));
+        when(repository.findByIdAndTenantId(1L, TENANT_ID)).thenReturn(Optional.of(meter));
 
         meterService.deleteById(TENANT_ID, 1L);
 

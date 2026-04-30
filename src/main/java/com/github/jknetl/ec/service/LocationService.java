@@ -23,8 +23,8 @@ public class LocationService {
 	private final LocationRepository repository;
 
 	public Optional<Location> findById(UUID tenantId, Long id) {
-		return repository.findById(id)
-				.filter(loc -> loc.getTenant().getId().equals(tenantId));
+		if (id == null) return Optional.empty();
+		return repository.findByIdAndTenantId(id, tenantId);
 	}
 
 	public List<Location> findAll(UUID tenantId) {

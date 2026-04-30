@@ -23,8 +23,8 @@ public class MeterService {
     private final LocationRepository locationRepository;
 
     public Optional<Meter> findById(UUID tenantId, Long id) {
-        return repository.findById(id)
-                .filter(m -> m.getTenant().getId().equals(tenantId));
+        if (id == null) return Optional.empty();
+        return repository.findByIdAndTenantId(id, tenantId);
     }
 
     public List<Meter> findAll(UUID tenantId) {

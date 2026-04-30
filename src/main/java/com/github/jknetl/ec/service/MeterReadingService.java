@@ -17,17 +17,18 @@ import static com.github.jknetl.ec.service.utils.ServiceUtils.verifyEntityHasNoI
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class MeterReadingService{
+public class MeterReadingService {
+
 	private final MeterReadingRepository repository;
 	private final MeterRepository meterRepository;
 
 	public Optional<MeterReading> findById(UUID tenantId, Long id) {
-		return repository.findById(id)
-				.filter(r -> r.getTenant().getId().equals(tenantId));
+		if (id == null) return Optional.empty();
+		return repository.findByIdAndTenantId(id, tenantId);
 	}
 
 	public List<MeterReading> findAll(UUID tenantId, Long meterId) {
-		return repository.findAllByMeterId(meterId);
+		return repository.findAllByMeterIdAndTenantId(meterId, tenantId);
 	}
 
 	@Transactional
