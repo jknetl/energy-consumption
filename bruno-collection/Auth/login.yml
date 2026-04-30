@@ -10,8 +10,8 @@ http:
     type: json
     data: |-
       {
-        "email": "user-a@example.com",
-        "password": "password-a"
+        "email": "{{email}}",
+        "password": "{{password}}"
       }
 
 script:
