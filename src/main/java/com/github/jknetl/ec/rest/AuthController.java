@@ -5,9 +5,7 @@ import com.github.jknetl.ec.rest.dto.LoginResponse;
 import com.github.jknetl.ec.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,8 +21,4 @@ public class AuthController {
     public LoginResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
     }
-
-    @ExceptionHandler(BadCredentialsException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public void handleBadCredentials() {}
 }
