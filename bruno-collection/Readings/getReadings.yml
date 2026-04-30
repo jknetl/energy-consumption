@@ -5,8 +5,11 @@ info:
 
 http:
   method: GET
-  url: "{{backendBaseUrl}}/meters/{{meterId}}/readings"
-  auth: inherit
+  url: "{{backendBaseUrl}}/api/meters/{{meterId}}/readings"
+  auth:
+    mode: bearer
+    bearer:
+      token: "{{accessToken}}"
 
 runtime:
   variables:

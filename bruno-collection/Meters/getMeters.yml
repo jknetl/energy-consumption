@@ -5,8 +5,11 @@ info:
 
 http:
   method: GET
-  url: "{{backendBaseUrl}}/meters"
-  auth: inherit
+  url: "{{backendBaseUrl}}/api/meters"
+  auth:
+    mode: bearer
+    bearer:
+      token: "{{accessToken}}"
 
 settings:
   encodeUrl: true

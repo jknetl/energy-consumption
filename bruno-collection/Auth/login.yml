@@ -1,0 +1,26 @@
+info:
+  name: login
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{backendBaseUrl}}/auth/login"
+  body:
+    type: json
+    data: |-
+      {
+        "email": "user-a@example.com",
+        "password": "password-a"
+      }
+
+script:
+  post-response: |
+    const res = bru.response.getBody();
+    bru.setEnvVar("accessToken", res.accessToken);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

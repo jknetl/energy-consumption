@@ -6,7 +6,10 @@ info:
 http:
   method: GET
   url: "{{backendBaseUrl}}/api/locations"
-  auth: inherit
+  auth:
+    mode: bearer
+    bearer:
+      token: "{{accessToken}}"
 
 settings:
   encodeUrl: true
