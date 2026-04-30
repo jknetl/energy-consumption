@@ -4,6 +4,7 @@ import com.github.jknetl.ec.TestEntityFactory;
 import com.github.jknetl.ec.data.model.*;
 import com.github.jknetl.ec.data.repository.LocationRepository;
 import com.github.jknetl.ec.data.repository.MeterRepository;
+import com.github.jknetl.ec.data.repository.TenantRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +30,7 @@ class MeterServiceTest {
 
     @Mock private MeterRepository repository;
     @Mock private LocationRepository locationRepository;
+    @Mock private TenantRepository tenantRepository;
 
     @InjectMocks private MeterService meterService;
 
@@ -79,6 +81,21 @@ class MeterServiceTest {
 
         assertThat(result).isEqualTo(saved);
         verify(repository).save(meter);
+    }
+
+    @Test
+    void create_shouldSetTenantFromTenantId() {
+        Tenant tenant = TestEntityFactory.createTenantA();
+        Location location = TestEntityFactory.createSavedLocation(tenant);
+        Meter meter = TestEntityFactory.createMeter(tenant, null);
+        meter.setTenant(null);
+        when(tenantRepository.getReferenceById(TENANT_ID)).thenReturn(tenant);
+        when(locationRepository.findById(location.getId())).thenReturn(Optional.of(location));
+        when(repository.save(any())).thenReturn(TestEntityFactory.createSavedMeter(tenant, location));
+
+        meterService.create(TENANT_ID, location.getId(), meter);
+
+        assertThat(meter.getTenant()).isEqualTo(tenant);
     }
 
     @Test

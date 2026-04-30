@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 
 import com.github.jknetl.ec.data.model.Location;
 import com.github.jknetl.ec.data.repository.LocationRepository;
+import com.github.jknetl.ec.data.repository.TenantRepository;
 import org.springframework.transaction.annotation.Transactional;
-
 
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +21,7 @@ import static com.github.jknetl.ec.service.utils.ServiceUtils.verifyEntityHasNoI
 public class LocationService {
 
 	private final LocationRepository repository;
+	private final TenantRepository tenantRepository;
 
 	public Optional<Location> findById(UUID tenantId, Long id) {
 		if (id == null) return Optional.empty();
@@ -32,8 +33,9 @@ public class LocationService {
 	}
 
 	@Transactional
-	public Location create(UUID tenantId, Location location){
+	public Location create(UUID tenantId, Location location) {
 		verifyEntityHasNoId(location);
+		location.setTenant(tenantRepository.getReferenceById(tenantId));
 		return repository.save(location);
 	}
 
@@ -41,6 +43,7 @@ public class LocationService {
 	public Location update(UUID tenantId, Location location) {
 		findById(tenantId, location.getId())
 				.orElseThrow(() -> new EntityNotFoundException("Location not found: " + location.getId()));
+		location.setTenant(tenantRepository.getReferenceById(tenantId));
 		return repository.save(location);
 	}
 

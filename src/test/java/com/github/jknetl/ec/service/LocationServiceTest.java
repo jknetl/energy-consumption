@@ -4,6 +4,7 @@ import com.github.jknetl.ec.TestEntityFactory;
 import com.github.jknetl.ec.data.model.Location;
 import com.github.jknetl.ec.data.model.Tenant;
 import com.github.jknetl.ec.data.repository.LocationRepository;
+import com.github.jknetl.ec.data.repository.TenantRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +27,7 @@ class LocationServiceTest {
     private static final UUID TENANT_ID = TestEntityFactory.TENANT_A_ID;
 
     @Mock private LocationRepository repository;
+    @Mock private TenantRepository tenantRepository;
     @InjectMocks private LocationService locationService;
 
     @Test
@@ -80,6 +82,18 @@ class LocationServiceTest {
     }
 
     @Test
+    void create_shouldSetTenantFromTenantId() {
+        Tenant tenant = TestEntityFactory.createTenantA();
+        Location location = TestEntityFactory.createLocation(null);
+        when(tenantRepository.getReferenceById(TENANT_ID)).thenReturn(tenant);
+        when(repository.save(any())).thenReturn(TestEntityFactory.createSavedLocation(tenant));
+
+        locationService.create(TENANT_ID, location);
+
+        assertThat(location.getTenant()).isEqualTo(tenant);
+    }
+
+    @Test
     void create_whenLocationHasId_shouldThrowRuntimeException() {
         Tenant tenant = TestEntityFactory.createTenantA();
         Location location = TestEntityFactory.createSavedLocation(tenant);
@@ -88,6 +102,19 @@ class LocationServiceTest {
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("When entity is being created then id must not be set.");
         verify(repository, never()).save(any());
+    }
+
+    @Test
+    void update_shouldSetTenantFromTenantId() {
+        Tenant tenant = TestEntityFactory.createTenantA();
+        Location location = TestEntityFactory.createSavedLocation(null);
+        when(tenantRepository.getReferenceById(TENANT_ID)).thenReturn(tenant);
+        when(repository.findByIdAndTenantId(1L, TENANT_ID)).thenReturn(Optional.of(location));
+        when(repository.save(any())).thenReturn(location);
+
+        locationService.update(TENANT_ID, location);
+
+        assertThat(location.getTenant()).isEqualTo(tenant);
     }
 
     @Test

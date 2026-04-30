@@ -3,6 +3,7 @@ package com.github.jknetl.ec.service;
 import com.github.jknetl.ec.data.model.MeterReading;
 import com.github.jknetl.ec.data.repository.MeterReadingRepository;
 import com.github.jknetl.ec.data.repository.MeterRepository;
+import com.github.jknetl.ec.data.repository.TenantRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ public class MeterReadingService {
 
 	private final MeterReadingRepository repository;
 	private final MeterRepository meterRepository;
+	private final TenantRepository tenantRepository;
 
 	public Optional<MeterReading> findById(UUID tenantId, Long id) {
 		if (id == null) return Optional.empty();
@@ -37,6 +39,7 @@ public class MeterReadingService {
 		var meter = meterRepository.findById(meterId)
 				.orElseThrow(() -> new EntityNotFoundException("Meter not found: " + meterId));
 		meterReading.setMeter(meter);
+		meterReading.setTenant(tenantRepository.getReferenceById(tenantId));
 		return repository.save(meterReading);
 	}
 
@@ -47,6 +50,7 @@ public class MeterReadingService {
 		var meter = meterRepository.findById(meterId)
 				.orElseThrow(() -> new EntityNotFoundException("Meter not found: " + meterId));
 		meterReading.setMeter(meter);
+		meterReading.setTenant(tenantRepository.getReferenceById(tenantId));
 		return repository.save(meterReading);
 	}
 
