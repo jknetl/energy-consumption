@@ -3,6 +3,7 @@ package com.github.jknetl.ec.data.init;
 import com.github.jknetl.ec.data.model.*;
 import com.github.jknetl.ec.data.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
@@ -25,14 +26,20 @@ public class LocalDevelopmentDataInitializer implements ApplicationRunner {
     private final MeterReadingRepository meterReadingRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Value("${app.init.user-a-password}")
+    private String userAPassword;
+
+    @Value("${app.init.user-b-password}")
+    private String userBPassword;
+
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
         Tenant tenantA = initTenant("Tenant A");
         Tenant tenantB = initTenant("Tenant B");
 
-        initUser(tenantA, "user-a@example.com", "password-a");
-        initUser(tenantB, "user-b@example.com", "password-b");
+        initUser(tenantA, "user-a@example.com", userAPassword);
+        initUser(tenantB, "user-b@example.com", userBPassword);
 
         List<Location> locations = initLocations(tenantA);
         List<Meter> meters = initMeters(tenantA, locations);
