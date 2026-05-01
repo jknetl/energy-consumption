@@ -2,9 +2,9 @@ name: local
 variables:
   - name: backendBaseUrl
     value: http://localhost:8080
-  - name: accessToken
-    value: ""
+  - secret: true
+    name: accessToken
   - name: email
     value: user-a@example.com
-  - name: password
-    value: password-a
+  - secret: true
+    name: password
