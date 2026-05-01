@@ -14,10 +14,10 @@ http:
         "password": "{{password}}"
       }
 
-script:
-  post-response: |
-    const res = bru.response.getBody();
-    bru.setEnvVar("accessToken", res.accessToken);
+runtime:
+  scripts:
+    - type: after-response
+      code: bru.setEnvVar("accessToken", res(".accessToken"));
 
 settings:
   encodeUrl: true

@@ -6,10 +6,7 @@ info:
 http:
   method: GET
   url: "{{backendBaseUrl}}/api/meters/{{meterId}}/readings"
-  auth:
-    mode: bearer
-    bearer:
-      token: "{{accessToken}}"
+  auth: inherit
 
 runtime:
   variables:

@@ -13,10 +13,7 @@ http:
         "type": "GAS",
         "locationId": 1
       }
-  auth:
-    mode: bearer
-    bearer:
-      token: "{{accessToken}}"
+  auth: inherit
 
 settings:
   encodeUrl: true
