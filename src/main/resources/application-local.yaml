@@ -9,5 +9,5 @@ spring:
 
 app:
   init:
-    user-a-password: password-a
-    user-b-password: password-b
+    user-a-password: ${USER_A_PASSWORD}
+    user-b-password: ${USER_B_PASSWORD}
