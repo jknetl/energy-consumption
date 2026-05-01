@@ -6,3 +6,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
+
+app:
+  init:
+    user-a-password: ${USER_A_PASSWORD}
+    user-b-password: ${USER_B_PASSWORD}

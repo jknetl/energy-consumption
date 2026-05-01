@@ -30,8 +30,8 @@ class MeterReadingRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        tenantA = em.persist(new Tenant(null, "Tenant A"));
-        tenantB = em.persist(new Tenant(null, "Tenant B"));
+        tenantA = em.persist(new Tenant(null, "Tenant A", null));
+        tenantB = em.persist(new Tenant(null, "Tenant B", null));
         Location locationA = em.persist(TestEntityFactory.createLocation(tenantA));
         Location locationB = em.persist(TestEntityFactory.createLocation(tenantB));
         meterA = em.persist(TestEntityFactory.createMeter(tenantA, locationA));

@@ -4,6 +4,7 @@ import com.github.jknetl.ec.TestEntityFactory;
 import com.github.jknetl.ec.data.model.*;
 import com.github.jknetl.ec.data.repository.MeterReadingRepository;
 import com.github.jknetl.ec.data.repository.MeterRepository;
+import com.github.jknetl.ec.data.repository.TenantRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +31,7 @@ class MeterReadingServiceTest {
 
     @Mock private MeterReadingRepository repository;
     @Mock private MeterRepository meterRepository;
+    @Mock private TenantRepository tenantRepository;
     @InjectMocks private MeterReadingService meterReadingService;
 
     @Test
@@ -38,7 +40,7 @@ class MeterReadingServiceTest {
         Location location = TestEntityFactory.createSavedLocation(tenant);
         Meter meter = TestEntityFactory.createSavedMeter(tenant, location);
         MeterReading reading = TestEntityFactory.createSavedMeterReading(tenant, meter);
-        when(repository.findById(1L)).thenReturn(Optional.of(reading));
+        when(repository.findByIdAndTenantId(1L, TENANT_ID)).thenReturn(Optional.of(reading));
 
         Optional<MeterReading> result = meterReadingService.findById(TENANT_ID, 1L);
 
@@ -47,9 +49,12 @@ class MeterReadingServiceTest {
 
     @Test
     void findById_whenReadingDoesNotExist_shouldReturnEmpty() {
-        when(repository.findById(99L)).thenReturn(Optional.empty());
-
         assertThat(meterReadingService.findById(TENANT_ID, 99L)).isEmpty();
+    }
+
+    @Test
+    void findById_whenIdIsNull_shouldReturnEmpty() {
+        assertThat(meterReadingService.findById(TENANT_ID, null)).isEmpty();
     }
 
     @Test
@@ -58,14 +63,14 @@ class MeterReadingServiceTest {
         Location location = TestEntityFactory.createSavedLocation(tenant);
         Meter meter = TestEntityFactory.createSavedMeter(tenant, location);
         List<MeterReading> readings = List.of(TestEntityFactory.createSavedMeterReading(tenant, meter));
-        when(repository.findAllByMeterId(METER_ID)).thenReturn(readings);
+        when(repository.findAllByMeterIdAndTenantId(METER_ID, TENANT_ID)).thenReturn(readings);
 
         assertThat(meterReadingService.findAll(TENANT_ID, METER_ID)).hasSize(1);
     }
 
     @Test
     void findAll_whenMeterHasNoReadings_shouldReturnEmptyList() {
-        when(repository.findAllByMeterId(METER_ID)).thenReturn(List.of());
+        when(repository.findAllByMeterIdAndTenantId(METER_ID, TENANT_ID)).thenReturn(List.of());
 
         assertThat(meterReadingService.findAll(TENANT_ID, METER_ID)).isEmpty();
     }
@@ -77,7 +82,7 @@ class MeterReadingServiceTest {
         Meter meter = TestEntityFactory.createSavedMeter(tenant, location);
         MeterReading reading = TestEntityFactory.createMeterReading(tenant, null);
         MeterReading saved = TestEntityFactory.createSavedMeterReading(tenant, meter);
-        when(meterRepository.findById(METER_ID)).thenReturn(Optional.of(meter));
+        when(meterRepository.findByIdAndTenantId(METER_ID, TENANT_ID)).thenReturn(Optional.of(meter));
         when(repository.save(reading)).thenReturn(saved);
 
         MeterReading result = meterReadingService.create(TENANT_ID, METER_ID, reading);
@@ -85,6 +90,21 @@ class MeterReadingServiceTest {
         assertThat(reading.getMeter()).isEqualTo(meter);
         assertThat(result).isEqualTo(saved);
         verify(repository).save(reading);
+    }
+
+    @Test
+    void create_shouldSetTenantFromTenantId() {
+        Tenant tenant = TestEntityFactory.createTenantA();
+        Location location = TestEntityFactory.createSavedLocation(tenant);
+        Meter meter = TestEntityFactory.createSavedMeter(tenant, location);
+        MeterReading reading = TestEntityFactory.createMeterReading(null, null);
+        when(tenantRepository.getReferenceById(TENANT_ID)).thenReturn(tenant);
+        when(meterRepository.findByIdAndTenantId(METER_ID, TENANT_ID)).thenReturn(Optional.of(meter));
+        when(repository.save(any())).thenReturn(TestEntityFactory.createSavedMeterReading(tenant, meter));
+
+        meterReadingService.create(TENANT_ID, METER_ID, reading);
+
+        assertThat(reading.getTenant()).isEqualTo(tenant);
     }
 
     @Test
@@ -104,7 +124,7 @@ class MeterReadingServiceTest {
     void create_whenMeterDoesNotExist_shouldThrowEntityNotFoundException() {
         Tenant tenant = TestEntityFactory.createTenantA();
         MeterReading reading = TestEntityFactory.createMeterReading(tenant, null);
-        when(meterRepository.findById(METER_ID)).thenReturn(Optional.empty());
+        when(meterRepository.findByIdAndTenantId(METER_ID, TENANT_ID)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> meterReadingService.create(TENANT_ID, METER_ID, reading))
                 .isInstanceOf(EntityNotFoundException.class)
@@ -118,8 +138,8 @@ class MeterReadingServiceTest {
         Location location = TestEntityFactory.createSavedLocation(tenant);
         Meter meter = TestEntityFactory.createSavedMeter(tenant, location);
         MeterReading reading = TestEntityFactory.createSavedMeterReading(tenant, meter);
-        when(repository.existsById(1L)).thenReturn(true);
-        when(meterRepository.findById(METER_ID)).thenReturn(Optional.of(meter));
+        when(repository.findByIdAndTenantId(1L, TENANT_ID)).thenReturn(Optional.of(reading));
+        when(meterRepository.findByIdAndTenantId(METER_ID, TENANT_ID)).thenReturn(Optional.of(meter));
         when(repository.save(reading)).thenReturn(reading);
 
         MeterReading result = meterReadingService.update(TENANT_ID, METER_ID, reading);
@@ -145,7 +165,6 @@ class MeterReadingServiceTest {
         Location location = TestEntityFactory.createSavedLocation(tenant);
         Meter meter = TestEntityFactory.createSavedMeter(tenant, location);
         MeterReading reading = TestEntityFactory.createSavedMeterReading(tenant, meter);
-        when(repository.existsById(1L)).thenReturn(false);
 
         assertThatThrownBy(() -> meterReadingService.update(TENANT_ID, METER_ID, reading))
                 .isInstanceOf(EntityNotFoundException.class);
@@ -159,8 +178,8 @@ class MeterReadingServiceTest {
         Location location = TestEntityFactory.createSavedLocation(tenant);
         Meter meter = TestEntityFactory.createSavedMeter(tenant, location);
         MeterReading reading = TestEntityFactory.createSavedMeterReading(tenant, meter);
-        when(repository.existsById(1L)).thenReturn(true);
-        when(meterRepository.findById(METER_ID)).thenReturn(Optional.empty());
+        when(repository.findByIdAndTenantId(1L, TENANT_ID)).thenReturn(Optional.of(reading));
+        when(meterRepository.findByIdAndTenantId(METER_ID, TENANT_ID)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> meterReadingService.update(TENANT_ID, METER_ID, reading))
                 .isInstanceOf(EntityNotFoundException.class)
@@ -170,6 +189,12 @@ class MeterReadingServiceTest {
 
     @Test
     void deleteById_shouldCallRepositoryDeleteById() {
+        Tenant tenant = TestEntityFactory.createTenantA();
+        Location location = TestEntityFactory.createSavedLocation(tenant);
+        Meter meter = TestEntityFactory.createSavedMeter(tenant, location);
+        MeterReading reading = TestEntityFactory.createSavedMeterReading(tenant, meter);
+        when(repository.findByIdAndTenantId(1L, TENANT_ID)).thenReturn(Optional.of(reading));
+
         meterReadingService.deleteById(TENANT_ID, 1L);
 
         verify(repository).deleteById(1L);
@@ -185,7 +210,7 @@ class MeterReadingServiceTest {
         reading.setUnit(unit);
         MeterReading saved = TestEntityFactory.createSavedMeterReading(tenant, meter);
         saved.setUnit(unit);
-        when(meterRepository.findById(METER_ID)).thenReturn(Optional.of(meter));
+        when(meterRepository.findByIdAndTenantId(METER_ID, TENANT_ID)).thenReturn(Optional.of(meter));
         when(repository.save(reading)).thenReturn(saved);
 
         MeterReading result = meterReadingService.create(TENANT_ID, METER_ID, reading);

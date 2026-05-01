@@ -5,13 +5,18 @@ import com.github.jknetl.ec.data.model.EnergyType;
 import com.github.jknetl.ec.data.model.Meter;
 import com.github.jknetl.ec.rest.dto.MeterRequest;
 import com.github.jknetl.ec.rest.dto.MeterResponse;
+import com.github.jknetl.ec.data.repository.AppUserRepository;
 import com.github.jknetl.ec.rest.mapper.MeterMapper;
+import com.github.jknetl.ec.security.AppUserDetails;
+import com.github.jknetl.ec.security.JwtService;
+import com.github.jknetl.ec.security.SecurityConfig;
 import com.github.jknetl.ec.service.MeterService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -19,25 +24,35 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.Optional;
 
+import static com.github.jknetl.ec.TestEntityFactory.createAppUser;
+import static com.github.jknetl.ec.TestEntityFactory.createTenantA;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(MeterController.class)
+@Import(SecurityConfig.class)
 class MeterControllerTest {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
     @MockitoBean private MeterService meterService;
     @MockitoBean private MeterMapper meterMapper;
+    @MockitoBean private JwtService jwtService;
+    @MockitoBean private AppUserRepository appUserRepository;
 
     private static final String BASE_PATH = "/api/meters";
 
     private MeterRequest validRequest() {
         return new MeterRequest(EnergyType.ELECTRICITY, 1L);
+    }
+
+    private AppUserDetails testUser() {
+        return new AppUserDetails(createAppUser(createTenantA()));
     }
 
     @Test
@@ -46,7 +61,7 @@ class MeterControllerTest {
         when(meterService.findAll(any())).thenReturn(List.of());
         when(meterMapper.map(any(List.class))).thenReturn(List.of(response));
 
-        mockMvc.perform(get(BASE_PATH))
+        mockMvc.perform(get(BASE_PATH).with(user(testUser())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[0].type").value("ELECTRICITY"));
@@ -57,9 +72,15 @@ class MeterControllerTest {
         when(meterService.findAll(any())).thenReturn(List.of());
         when(meterMapper.map(any(List.class))).thenReturn(List.of());
 
-        mockMvc.perform(get(BASE_PATH))
+        mockMvc.perform(get(BASE_PATH).with(user(testUser())))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[]"));
+    }
+
+    @Test
+    void getAll_whenUnauthenticated_shouldReturn401() throws Exception {
+        mockMvc.perform(get(BASE_PATH))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -68,7 +89,7 @@ class MeterControllerTest {
         when(meterService.findById(any(), eq(1L))).thenReturn(Optional.of(new Meter()));
         when(meterMapper.map(any(Meter.class))).thenReturn(response);
 
-        mockMvc.perform(get(BASE_PATH + "/1"))
+        mockMvc.perform(get(BASE_PATH + "/1").with(user(testUser())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.type").value("GAS"))
                 .andExpect(jsonPath("$.locationId").value(2));
@@ -78,7 +99,7 @@ class MeterControllerTest {
     void get_whenMeterDoesNotExist_shouldReturn200WithNullBody() throws Exception {
         when(meterService.findById(any(), eq(99L))).thenReturn(Optional.empty());
 
-        mockMvc.perform(get(BASE_PATH + "/99")).andExpect(status().isOk());
+        mockMvc.perform(get(BASE_PATH + "/99").with(user(testUser()))).andExpect(status().isOk());
     }
 
     @Test
@@ -87,6 +108,7 @@ class MeterControllerTest {
         when(meterService.create(any(), any(), any())).thenReturn(new Meter());
 
         mockMvc.perform(post(BASE_PATH)
+                        .with(user(testUser()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validRequest())))
                 .andExpect(status().isCreated());
@@ -98,6 +120,7 @@ class MeterControllerTest {
         MeterRequest invalidRequest = new MeterRequest(null, 1L);
 
         mockMvc.perform(post(BASE_PATH)
+                        .with(user(testUser()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
@@ -108,6 +131,7 @@ class MeterControllerTest {
         MeterRequest invalidRequest = new MeterRequest(EnergyType.ELECTRICITY, null);
 
         mockMvc.perform(post(BASE_PATH)
+                        .with(user(testUser()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
@@ -120,6 +144,7 @@ class MeterControllerTest {
         when(meterService.create(any(), any(), any())).thenReturn(new Meter());
 
         mockMvc.perform(post(BASE_PATH)
+                        .with(user(testUser()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new MeterRequest(type, 1L))))
                 .andExpect(status().isCreated());
@@ -131,6 +156,7 @@ class MeterControllerTest {
         when(meterService.update(any(), any(), any())).thenReturn(new Meter());
 
         mockMvc.perform(put(BASE_PATH + "/1")
+                        .with(user(testUser()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validRequest())))
                 .andExpect(status().isOk());
@@ -142,6 +168,7 @@ class MeterControllerTest {
         MeterRequest invalidRequest = new MeterRequest(null, 1L);
 
         mockMvc.perform(put(BASE_PATH + "/1")
+                        .with(user(testUser()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
@@ -151,7 +178,7 @@ class MeterControllerTest {
     void delete_whenCalled_shouldReturn200() throws Exception {
         // DELETE with no Content-Type is correct REST behavior.
         // Will return 415 if the endpoint still has consumes = APPLICATION_JSON_VALUE — that's the production bug.
-        mockMvc.perform(delete(BASE_PATH + "/1")).andExpect(status().isOk());
+        mockMvc.perform(delete(BASE_PATH + "/1").with(user(testUser()))).andExpect(status().isOk());
         verify(meterService).deleteById(any(), eq(1L));
     }
 }

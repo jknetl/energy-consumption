@@ -2,6 +2,10 @@ opencollection: 1.0.0
 
 info:
   name: Energy Consumption
+request:
+  auth:
+    type: bearer
+    token: "{{accessToken}}"
 bundled: false
 extensions:
   bruno:

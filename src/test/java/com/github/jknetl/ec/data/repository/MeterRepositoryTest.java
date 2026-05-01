@@ -29,8 +29,8 @@ class MeterRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        tenantA = em.persist(new Tenant(null, "Tenant A"));
-        tenantB = em.persist(new Tenant(null, "Tenant B"));
+        tenantA = em.persist(new Tenant(null, "Tenant A", null));
+        tenantB = em.persist(new Tenant(null, "Tenant B", null));
         locationA = em.persist(TestEntityFactory.createLocation(tenantA));
         em.flush();
         tenantAId = em.getId(tenantA, UUID.class);

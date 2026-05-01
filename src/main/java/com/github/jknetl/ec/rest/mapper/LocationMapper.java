@@ -13,6 +13,7 @@ import java.util.List;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface LocationMapper {
 
+    @Mapping(target = "id", source = "id")
     Location map(Tenant tenant, Long id, LocationRequest locationRequest);
 
     LocationResponse map(Location location);

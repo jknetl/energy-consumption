@@ -27,8 +27,8 @@ class LocationRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        tenantA = em.persist(new Tenant(null, "Tenant A"));
-        tenantB = em.persist(new Tenant(null, "Tenant B"));
+        tenantA = em.persist(new Tenant(null, "Tenant A", null));
+        tenantB = em.persist(new Tenant(null, "Tenant B", null));
         em.flush();
         tenantAId = em.getId(tenantA, UUID.class);
         tenantBId = em.getId(tenantB, UUID.class);

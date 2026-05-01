@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: "{{backendBaseUrl}}/meters/{{meterId}}/readings"
+  url: "{{backendBaseUrl}}/api/meters/{{meterId}}/readings"
   auth: inherit
 
 runtime:

@@ -4,6 +4,7 @@ import com.github.jknetl.ec.TestEntityFactory;
 import com.github.jknetl.ec.data.model.Location;
 import com.github.jknetl.ec.data.model.Tenant;
 import com.github.jknetl.ec.data.repository.LocationRepository;
+import com.github.jknetl.ec.data.repository.TenantRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,13 +27,14 @@ class LocationServiceTest {
     private static final UUID TENANT_ID = TestEntityFactory.TENANT_A_ID;
 
     @Mock private LocationRepository repository;
+    @Mock private TenantRepository tenantRepository;
     @InjectMocks private LocationService locationService;
 
     @Test
     void findById_whenLocationExists_shouldReturnLocation() {
         Tenant tenant = TestEntityFactory.createTenantA();
         Location location = TestEntityFactory.createSavedLocation(tenant);
-        when(repository.findById(1L)).thenReturn(Optional.of(location));
+        when(repository.findByIdAndTenantId(1L, TENANT_ID)).thenReturn(Optional.of(location));
 
         Optional<Location> result = locationService.findById(TENANT_ID, 1L);
 
@@ -41,9 +43,14 @@ class LocationServiceTest {
 
     @Test
     void findById_whenLocationDoesNotExist_shouldReturnEmpty() {
-        when(repository.findById(99L)).thenReturn(Optional.empty());
-
         Optional<Location> result = locationService.findById(TENANT_ID, 99L);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void findById_whenIdIsNull_shouldReturnEmpty() {
+        Optional<Location> result = locationService.findById(TENANT_ID, null);
 
         assertThat(result).isEmpty();
     }
@@ -54,7 +61,7 @@ class LocationServiceTest {
         List<Location> locations = List.of(
                 TestEntityFactory.createSavedLocation(tenant),
                 TestEntityFactory.createSavedLocation(tenant));
-        when(repository.findAll()).thenReturn(locations);
+        when(repository.findAllByTenantId(TENANT_ID)).thenReturn(locations);
 
         List<Location> result = locationService.findAll(TENANT_ID);
 
@@ -75,6 +82,18 @@ class LocationServiceTest {
     }
 
     @Test
+    void create_shouldSetTenantFromTenantId() {
+        Tenant tenant = TestEntityFactory.createTenantA();
+        Location location = TestEntityFactory.createLocation(null);
+        when(tenantRepository.getReferenceById(TENANT_ID)).thenReturn(tenant);
+        when(repository.save(any())).thenReturn(TestEntityFactory.createSavedLocation(tenant));
+
+        locationService.create(TENANT_ID, location);
+
+        assertThat(location.getTenant()).isEqualTo(tenant);
+    }
+
+    @Test
     void create_whenLocationHasId_shouldThrowRuntimeException() {
         Tenant tenant = TestEntityFactory.createTenantA();
         Location location = TestEntityFactory.createSavedLocation(tenant);
@@ -86,10 +105,23 @@ class LocationServiceTest {
     }
 
     @Test
+    void update_shouldSetTenantFromTenantId() {
+        Tenant tenant = TestEntityFactory.createTenantA();
+        Location location = TestEntityFactory.createSavedLocation(null);
+        when(tenantRepository.getReferenceById(TENANT_ID)).thenReturn(tenant);
+        when(repository.findByIdAndTenantId(1L, TENANT_ID)).thenReturn(Optional.of(location));
+        when(repository.save(any())).thenReturn(location);
+
+        locationService.update(TENANT_ID, location);
+
+        assertThat(location.getTenant()).isEqualTo(tenant);
+    }
+
+    @Test
     void update_whenLocationExists_shouldSaveAndReturnLocation() {
         Tenant tenant = TestEntityFactory.createTenantA();
         Location location = TestEntityFactory.createSavedLocation(tenant);
-        when(repository.existsById(1L)).thenReturn(true);
+        when(repository.findByIdAndTenantId(1L, TENANT_ID)).thenReturn(Optional.of(location));
         when(repository.save(location)).thenReturn(location);
 
         Location result = locationService.update(TENANT_ID, location);
@@ -102,11 +134,9 @@ class LocationServiceTest {
     void update_whenLocationDoesNotExist_shouldThrowEntityNotFoundException() {
         Tenant tenant = TestEntityFactory.createTenantA();
         Location location = TestEntityFactory.createSavedLocation(tenant);
-        when(repository.existsById(1L)).thenReturn(false);
 
         assertThatThrownBy(() -> locationService.update(TENANT_ID, location))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Such entity doesn't exist");
+                .isInstanceOf(EntityNotFoundException.class);
         verify(repository, never()).save(any());
     }
 
@@ -116,12 +146,15 @@ class LocationServiceTest {
         Location location = TestEntityFactory.createLocation(tenant);
 
         assertThatThrownBy(() -> locationService.update(TENANT_ID, location))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Such entity doesn't exist");
+                .isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
     void deleteById_shouldCallRepositoryDeleteById() {
+        Tenant tenant = TestEntityFactory.createTenantA();
+        Location location = TestEntityFactory.createSavedLocation(tenant);
+        when(repository.findByIdAndTenantId(1L, TENANT_ID)).thenReturn(Optional.of(location));
+
         locationService.deleteById(TENANT_ID, 1L);
 
         verify(repository).deleteById(1L);

@@ -15,6 +15,7 @@ import java.util.List;
 public interface MeterReadingMapper {
 
     @Mapping(target = "meter", ignore = true)
+    @Mapping(target = "id", source = "id")
     MeterReading map(Tenant tenant, Long id, MeterReadingRequest meterReadingRequest);
 
     @Mapping(target = "meterId", source = "meter.id")
