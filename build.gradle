@@ -41,6 +41,7 @@ dependencies {
 
 	// Spring Security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
 	// JWT (RS256)
 	implementation 'io.jsonwebtoken:jjwt-api:0.13.0'

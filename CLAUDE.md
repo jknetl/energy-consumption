@@ -140,3 +140,25 @@ Examples:
 **Arrange/Act/Assert:** Separate the three blocks with a blank line. Do NOT write `// Arrange`, `// Act`, or `// Assert` comments.
 
 **Parameterized tests:** Use `@EnumSource` for enum variants, `@ValueSource` for primitives/strings.
+
+### Kubernetes Deployment
+
+Manifests live in `k8s/` using Kustomize.
+
+**Directory layout:**
+- `k8s/base/` — Deployment, Service, PDB, ConfigMapGenerator
+- `k8s/components/ingress/` — optional Traefik Ingress (opt-in per overlay)
+- `k8s/overlays/dev/` — dev resources (100m–300m CPU, 256–512Mi RAM), no Ingress
+- `k8s/overlays/prod/` — prod resources (250m–500m CPU, 512Mi–1Gi RAM), Ingress enabled
+
+**Apply an overlay:**
+```bash
+kubectl apply -k k8s/overlays/dev
+kubectl apply -k k8s/overlays/prod
+```
+
+**Secrets:** Each overlay has a committed `secrets.env.example` with `PGUSER` and `PGPASSWORD`. Copy it to `secrets.env` (gitignored) and fill in values before deploying.
+
+**Image tag:** Update `images.newTag` in the overlay's `kustomization.yaml` after building and pushing with `./gradlew jib`.
+
+**Database URL:** Defaults to `postgresql:5432` (in-cluster service name). Override the `SPRING_DATASOURCE_URL` literal in `k8s/base/kustomization.yaml` if your PostgreSQL service has a different name.

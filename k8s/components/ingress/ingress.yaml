@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: energy-consumption
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: energy-consumption.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: energy-consumption
+                port:
+                  number: 8080
