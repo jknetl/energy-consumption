@@ -38,3 +38,6 @@ out/
 
 ## ENV files
 .env
+
+## Kubernetes secrets
+k8s/overlays/*/secrets.env

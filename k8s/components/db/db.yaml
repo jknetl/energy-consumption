@@ -1,0 +1,19 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: energy-consumption-db
+spec:
+  instances: 2
+  bootstrap:
+    initdb:
+      database: energy_consumption
+      owner: energy_consumption
+  storage:
+    size: 1Gi
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "50m"
+    limits:
+      memory: "256Mi"
+      cpu: "100m"

@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: energy-consumption
+spec:
+  template:
+    spec:
+      containers:
+        - name: energy-consumption
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+              ephemeral-storage: 64Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+              ephemeral-storage: 256Mi

@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: energy-consumption
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: energy-consumption
+  template:
+    metadata:
+      labels:
+        app: energy-consumption
+    spec:
+      containers:
+        - name: energy-consumption
+          image: jknetl/energy-consumption:latest
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: energy-consumption-config
+          env:
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: energy-consumption-db-app
+                  key: username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: energy-consumption-db-app
+                  key: password
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+              ephemeral-storage: 64Mi
+            limits:
+              cpu: 300m
+              memory: 512Mi
+              ephemeral-storage: 256Mi
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 3

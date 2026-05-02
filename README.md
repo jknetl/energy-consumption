@@ -31,3 +31,31 @@ A [Bruno](https://www.usebruno.com/) collection for manually exploring the REST 
 4. from terminal
    - load variables from the `.env` file
    - run ` ./gradlew bootRun --args='--spring.profiles.active=local'`
+
+## Deploying to Kubernetes
+
+### Prerequisites
+
+- `kubectl` configured for your target cluster
+- `kustomize` v5+ (or `kubectl` v1.27+ with built-in kustomize)
+- Docker image built and pushed: `./gradlew jib`
+- [CloudNativePG operator](https://cloudnative-pg.io/) installed in the cluster — provisions the PostgreSQL cluster and credentials automatically
+
+### Steps
+
+1. *(Optional)* Pin a specific image tag by adding to the overlay's `kustomization.yaml`:
+
+   ```yaml
+   images:
+     - name: jknetl/energy-consumption
+       newTag: "1.0.0"
+   ```
+
+2. Apply:
+
+   ```bash
+   # Dev (manual):
+   kubectl apply -k k8s/overlays/dev
+
+   # Prod: managed by ArgoCD — push to main and sync the energy-consumption application.
+   ```
