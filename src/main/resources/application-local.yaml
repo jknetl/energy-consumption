@@ -5,7 +5,7 @@ spring:
     password: ${PGPASSWORD}
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
 
 app:
   init:
