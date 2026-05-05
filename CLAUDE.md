@@ -128,6 +128,14 @@ Notable mapper quirks:
 - Jib plugin for Docker images — target image: `jknetl/energy-consumption`
 - Lombok + MapStruct annotation processors both configured in `build.gradle`
 
+#### Database Migrations
+
+Flyway manages the schema. Migration files live in `src/main/resources/db/migration` and follow the naming convention `V{n}__{description}.sql`.
+
+**Rule:** Any change to the domain/data model (new table, column, constraint) requires a new versioned migration file. Do not rely on `ddl-auto` to modify the schema.
+
+Tests disable Flyway (`spring.flyway.enabled=false`) and use H2 in-memory with `ddl-auto: create-drop` instead.
+
 ### Testing Conventions
 
 **Naming pattern:** `methodName_whenCondition_shouldExpectedBehavior`

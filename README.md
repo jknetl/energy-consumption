@@ -25,6 +25,7 @@ A [Bruno](https://www.usebruno.com/) collection for manually exploring the REST 
     ```
     docker compose up -d
     ```
+   Flyway runs automatically on application startup and applies any pending migrations from `src/main/resources/db/migration`.
 3. configure the run configuration in your IDE to
    - use `local` Spring profile
    - set the environment variables from the `.env` file
