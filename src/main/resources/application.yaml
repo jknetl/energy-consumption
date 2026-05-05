@@ -6,6 +6,8 @@ spring:
       ddl-auto: validate
 
 management:
+  server:
+    port: 8081
   endpoint:
     health:
       probes:
