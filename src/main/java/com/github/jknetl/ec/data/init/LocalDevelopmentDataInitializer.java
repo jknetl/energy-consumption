@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Component
@@ -136,12 +138,14 @@ public class LocalDevelopmentDataInitializer implements ApplicationRunner {
 
     private void seedReadings(Tenant tenant, Meter meter, EnergyUnit unit, double[] values) {
         if (!meterReadingRepository.findAllByMeterId(meter.getId()).isEmpty()) return;
-        for (double value : values) {
+        Instant start = Instant.parse("2026-05-05T11:40:00Z");
+        for (int i = 0; i < values.length; i++) {
             MeterReading reading = new MeterReading();
             reading.setTenant(tenant);
             reading.setMeter(meter);
             reading.setUnit(unit);
-            reading.setValue(BigDecimal.valueOf(value));
+            reading.setValue(BigDecimal.valueOf(values[i]));
+            reading.setTakenAt(start.plus(i, ChronoUnit.DAYS));
             meterReadingRepository.save(reading);
         }
     }
