@@ -1,7 +1,9 @@
 package com.github.jknetl.ec.data.model;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -26,6 +28,10 @@ public class MeterReading implements TenantScopedEntity{
 
 	@NotNull
 	private EnergyUnit unit;
+
+	@NotNull
+	@Column(nullable = false)
+	private Instant takenAt;
 
 	@ManyToOne(optional = false)
 	private Meter meter;

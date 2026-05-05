@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import lombok.Data;
+import org.hibernate.validator.constraints.Length;
 
 @Data
 @Entity
@@ -22,6 +23,9 @@ public class Meter implements TenantScopedEntity{
 
 	@Enumerated(EnumType.STRING)
 	private EnergyType type;
+
+	@Length(max = 100)
+	private String name;
 
 	@ManyToOne(optional = false)
 	private Location location;

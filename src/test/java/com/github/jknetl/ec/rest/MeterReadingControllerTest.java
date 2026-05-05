@@ -22,6 +22,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,8 +49,10 @@ class MeterReadingControllerTest {
 
     private static final String BASE_PATH = "/api/meters/1/readings";
 
+    private static final Instant TAKEN_AT = Instant.parse("2024-01-15T10:00:00Z");
+
     private MeterReadingRequest validRequest() {
-        return new MeterReadingRequest(new BigDecimal("100.00"), EnergyUnit.KWH);
+        return new MeterReadingRequest(new BigDecimal("100.00"), EnergyUnit.KWH, TAKEN_AT);
     }
 
     private AppUserDetails testUser() {
@@ -58,7 +61,7 @@ class MeterReadingControllerTest {
 
     @Test
     void getAll_whenReadingsExist_shouldReturn200WithReadingList() throws Exception {
-        MeterReadingResponse response = new MeterReadingResponse(1L, new BigDecimal("100.00"), EnergyUnit.KWH, 1L);
+        MeterReadingResponse response = new MeterReadingResponse(1L, new BigDecimal("100.00"), EnergyUnit.KWH, TAKEN_AT, 1L);
         when(meterReadingService.findAll(any(), eq(1L))).thenReturn(List.of());
         when(meterReadingMapper.map(any(List.class))).thenReturn(List.of(response));
 
@@ -86,7 +89,7 @@ class MeterReadingControllerTest {
 
     @Test
     void get_whenReadingExists_shouldReturn200WithReading() throws Exception {
-        MeterReadingResponse response = new MeterReadingResponse(1L, new BigDecimal("50.00"), EnergyUnit.CUBIC_METER, 1L);
+        MeterReadingResponse response = new MeterReadingResponse(1L, new BigDecimal("50.00"), EnergyUnit.CUBIC_METER, TAKEN_AT, 1L);
         when(meterReadingService.findById(any(), eq(1L))).thenReturn(Optional.of(new MeterReading()));
         when(meterReadingMapper.map(any(MeterReading.class))).thenReturn(response);
 
@@ -117,7 +120,7 @@ class MeterReadingControllerTest {
 
     @Test
     void add_whenValueIsNull_shouldReturn400() throws Exception {
-        MeterReadingRequest invalidRequest = new MeterReadingRequest(null, EnergyUnit.KWH);
+        MeterReadingRequest invalidRequest = new MeterReadingRequest(null, EnergyUnit.KWH, TAKEN_AT);
 
         mockMvc.perform(post(BASE_PATH)
                         .with(user(testUser()))
@@ -128,7 +131,7 @@ class MeterReadingControllerTest {
 
     @Test
     void add_whenValueIsNegative_shouldReturn400() throws Exception {
-        MeterReadingRequest invalidRequest = new MeterReadingRequest(new BigDecimal("-1"), EnergyUnit.KWH);
+        MeterReadingRequest invalidRequest = new MeterReadingRequest(new BigDecimal("-1"), EnergyUnit.KWH, TAKEN_AT);
 
         mockMvc.perform(post(BASE_PATH)
                         .with(user(testUser()))
@@ -139,7 +142,7 @@ class MeterReadingControllerTest {
 
     @Test
     void add_whenUnitIsNull_shouldReturn400() throws Exception {
-        MeterReadingRequest invalidRequest = new MeterReadingRequest(new BigDecimal("100.00"), null);
+        MeterReadingRequest invalidRequest = new MeterReadingRequest(new BigDecimal("100.00"), null, TAKEN_AT);
 
         mockMvc.perform(post(BASE_PATH)
                         .with(user(testUser()))
@@ -157,7 +160,7 @@ class MeterReadingControllerTest {
         mockMvc.perform(post(BASE_PATH)
                         .with(user(testUser()))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new MeterReadingRequest(new BigDecimal("100.00"), unit))))
+                        .content(objectMapper.writeValueAsString(new MeterReadingRequest(new BigDecimal("100.00"), unit, TAKEN_AT))))
                 .andExpect(status().isCreated());
     }
 
@@ -176,9 +179,20 @@ class MeterReadingControllerTest {
 
     @Test
     void update_whenValueIsNegative_shouldReturn400() throws Exception {
-        MeterReadingRequest invalidRequest = new MeterReadingRequest(new BigDecimal("-1"), EnergyUnit.KWH);
+        MeterReadingRequest invalidRequest = new MeterReadingRequest(new BigDecimal("-1"), EnergyUnit.KWH, TAKEN_AT);
 
         mockMvc.perform(put(BASE_PATH + "/1")
+                        .with(user(testUser()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void add_whenTakenAtIsNull_shouldReturn400() throws Exception {
+        MeterReadingRequest invalidRequest = new MeterReadingRequest(new BigDecimal("100.00"), EnergyUnit.KWH, null);
+
+        mockMvc.perform(post(BASE_PATH)
                         .with(user(testUser()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))

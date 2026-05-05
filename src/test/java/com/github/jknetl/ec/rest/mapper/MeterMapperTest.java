@@ -18,11 +18,12 @@ class MeterMapperTest {
     private final MeterMapper mapper = new MeterMapperImpl();
 
     @Test
-    void map_whenAllArgsProvided_shouldMapTypeAndTenantAndId() {
+    void map_whenAllArgsProvided_shouldMapTypeNameTenantAndId() {
         Tenant tenant = TestEntityFactory.createTenantA();
         MeterRequest request = MeterRequest.builder()
                 .type(EnergyType.GAS)
                 .locationId(5L)
+                .name("Main Meter")
                 .build();
 
         Meter result = mapper.map(tenant, 10L, request);
@@ -30,6 +31,7 @@ class MeterMapperTest {
         assertThat(result.getTenant()).isEqualTo(tenant);
         assertThat(result.getId()).isEqualTo(10L);
         assertThat(result.getType()).isEqualTo(EnergyType.GAS);
+        assertThat(result.getName()).isEqualTo("Main Meter");
     }
 
     @Test
@@ -38,6 +40,7 @@ class MeterMapperTest {
         MeterRequest request = MeterRequest.builder()
                 .type(EnergyType.ELECTRICITY)
                 .locationId(5L)
+                .name("Test Meter")
                 .build();
 
         Meter result = mapper.map(tenant, 1L, request);

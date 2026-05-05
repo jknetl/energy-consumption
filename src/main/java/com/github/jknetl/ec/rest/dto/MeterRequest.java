@@ -9,6 +9,7 @@ public record MeterRequest(
         @NotNull
         EnergyType type,
         @NotNull
-        Long locationId
+        Long locationId,
+        String name
 ) {
 }

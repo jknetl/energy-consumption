@@ -11,6 +11,7 @@ import com.github.jknetl.ec.rest.dto.MeterReadingResponse;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,11 +21,13 @@ class MeterReadingMapperTest {
     private final MeterReadingMapper mapper = new MeterReadingMapperImpl();
 
     @Test
-    void map_whenAllArgsProvided_shouldMapValueUnitTenantAndId() {
+    void map_whenAllArgsProvided_shouldMapValueUnitTakenAtTenantAndId() {
         Tenant tenant = TestEntityFactory.createTenantA();
+        Instant takenAt = Instant.parse("2024-06-01T08:00:00Z");
         MeterReadingRequest request = MeterReadingRequest.builder()
                 .value(new BigDecimal("250.50"))
                 .unit(EnergyUnit.CUBIC_METER)
+                .takenAt(takenAt)
                 .build();
 
         MeterReading result = mapper.map(tenant, 99L, request);
@@ -33,6 +36,7 @@ class MeterReadingMapperTest {
         assertThat(result.getId()).isEqualTo(99L);
         assertThat(result.getValue()).isEqualByComparingTo(new BigDecimal("250.50"));
         assertThat(result.getUnit()).isEqualTo(EnergyUnit.CUBIC_METER);
+        assertThat(result.getTakenAt()).isEqualTo(takenAt);
     }
 
     @Test
@@ -41,6 +45,7 @@ class MeterReadingMapperTest {
         MeterReadingRequest request = MeterReadingRequest.builder()
                 .value(new BigDecimal("100.00"))
                 .unit(EnergyUnit.KWH)
+                .takenAt(Instant.now())
                 .build();
 
         MeterReading result = mapper.map(tenant, 1L, request);
