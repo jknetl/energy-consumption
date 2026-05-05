@@ -10,6 +10,7 @@ public record MeterResponse(
         Long id,
         @NotNull
         EnergyType type,
+        String name,
         @NotNull
         Long locationId
 ) {

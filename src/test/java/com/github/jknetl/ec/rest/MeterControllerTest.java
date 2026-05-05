@@ -48,7 +48,7 @@ class MeterControllerTest {
     private static final String BASE_PATH = "/api/meters";
 
     private MeterRequest validRequest() {
-        return new MeterRequest(EnergyType.ELECTRICITY, 1L);
+        return new MeterRequest(EnergyType.ELECTRICITY, 1L, null);
     }
 
     private AppUserDetails testUser() {
@@ -57,7 +57,7 @@ class MeterControllerTest {
 
     @Test
     void getAll_whenMetersExist_shouldReturn200WithMeterList() throws Exception {
-        MeterResponse response = new MeterResponse(1L, EnergyType.ELECTRICITY, 1L);
+        MeterResponse response = new MeterResponse(1L, EnergyType.ELECTRICITY, null, 1L);
         when(meterService.findAll(any())).thenReturn(List.of());
         when(meterMapper.map(any(List.class))).thenReturn(List.of(response));
 
@@ -85,7 +85,7 @@ class MeterControllerTest {
 
     @Test
     void get_whenMeterExists_shouldReturn200WithMeter() throws Exception {
-        MeterResponse response = new MeterResponse(1L, EnergyType.GAS, 2L);
+        MeterResponse response = new MeterResponse(1L, EnergyType.GAS, null, 2L);
         when(meterService.findById(any(), eq(1L))).thenReturn(Optional.of(new Meter()));
         when(meterMapper.map(any(Meter.class))).thenReturn(response);
 
@@ -117,7 +117,7 @@ class MeterControllerTest {
 
     @Test
     void add_whenTypeIsNull_shouldReturn400() throws Exception {
-        MeterRequest invalidRequest = new MeterRequest(null, 1L);
+        MeterRequest invalidRequest = new MeterRequest(null, 1L, null);
 
         mockMvc.perform(post(BASE_PATH)
                         .with(user(testUser()))
@@ -128,7 +128,7 @@ class MeterControllerTest {
 
     @Test
     void add_whenLocationIdIsNull_shouldReturn400() throws Exception {
-        MeterRequest invalidRequest = new MeterRequest(EnergyType.ELECTRICITY, null);
+        MeterRequest invalidRequest = new MeterRequest(EnergyType.ELECTRICITY, null, null);
 
         mockMvc.perform(post(BASE_PATH)
                         .with(user(testUser()))
@@ -146,7 +146,7 @@ class MeterControllerTest {
         mockMvc.perform(post(BASE_PATH)
                         .with(user(testUser()))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new MeterRequest(type, 1L))))
+                        .content(objectMapper.writeValueAsString(new MeterRequest(type, 1L, null))))
                 .andExpect(status().isCreated());
     }
 
@@ -165,7 +165,7 @@ class MeterControllerTest {
 
     @Test
     void update_whenTypeIsNull_shouldReturn400() throws Exception {
-        MeterRequest invalidRequest = new MeterRequest(null, 1L);
+        MeterRequest invalidRequest = new MeterRequest(null, 1L, null);
 
         mockMvc.perform(put(BASE_PATH + "/1")
                         .with(user(testUser()))

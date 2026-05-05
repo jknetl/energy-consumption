@@ -4,6 +4,7 @@ import com.github.jknetl.ec.data.model.*;
 import lombok.experimental.UtilityClass;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.UUID;
 
 @UtilityClass
@@ -57,6 +58,7 @@ public class TestEntityFactory {
         mr.setMeter(meter);
         mr.setValue(new BigDecimal("100.00"));
         mr.setUnit(EnergyUnit.KWH);
+        mr.setTakenAt(Instant.parse("2024-01-15T10:00:00Z"));
         return mr;
     }
 
