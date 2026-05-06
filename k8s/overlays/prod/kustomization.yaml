@@ -10,4 +10,4 @@ patches:
   - path: resources-patch.yaml
 images:
   - name: jknetl/energy-consumption
-    newTag: d8b38f5
+    newTag: 5e5e7a8
