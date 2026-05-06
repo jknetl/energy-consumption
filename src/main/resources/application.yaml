@@ -5,6 +5,11 @@ spring:
     hibernate:
       ddl-auto: validate
 
+app:
+  jwt:
+    private-key: ${APP_JWT_PRIVATE_KEY}
+    public-key: ${APP_JWT_PUBLIC_KEY}
+
 management:
   server:
     port: 8081
