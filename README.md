@@ -41,6 +41,7 @@ A [Bruno](https://www.usebruno.com/) collection for manually exploring the REST 
 - `kustomize` v5+ (or `kubectl` v1.27+ with built-in kustomize)
 - Docker image built and pushed: `./gradlew jib`
 - [CloudNativePG operator](https://cloudnative-pg.io/) installed in the cluster — provisions the PostgreSQL cluster and credentials automatically
+- secret `energy-consumption-jwt` present in the cluster with RSA key used for JWT
 
 ### Steps
 

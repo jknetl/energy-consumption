@@ -31,6 +31,16 @@ spec:
                 secretKeyRef:
                   name: energy-consumption-db-app
                   key: password
+            - name: APP_JWT_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: energy-consumption-jwt
+                  key: private-key
+            - name: APP_JWT_PUBLIC_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: energy-consumption-jwt
+                  key: public-key
           resources:
             requests:
               cpu: 100m
