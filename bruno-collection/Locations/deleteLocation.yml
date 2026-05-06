@@ -1,0 +1,20 @@
+info:
+  name: deleteLocation
+  type: http
+  seq: 3
+
+http:
+  method: DELETE
+  url: "{{backendBaseUrl}}/api/locations/{{id}}"
+  auth: inherit
+
+runtime:
+  variables:
+    - name: id
+      value: "2"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,10 @@
+name: prod
+variables:
+  - secret: true
+    name: backendBaseUrl
+  - secret: true
+    name: accessToken
+  - secret: true
+    name: email
+  - secret: true
+    name: password
