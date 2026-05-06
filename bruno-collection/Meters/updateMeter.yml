@@ -1,0 +1,27 @@
+info:
+  name: updateMeter
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{backendBaseUrl}}/api/meters/{{id}}"
+  body:
+    type: json
+    data: |-
+      {
+        "type": "GAS",
+        "locationId": 53
+      }
+  auth: inherit
+
+runtime:
+  variables:
+    - name: id
+      value: "1"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

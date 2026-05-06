@@ -1,0 +1,31 @@
+info:
+  name: updateLocation
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{backendBaseUrl}}/api/locations/{{id}}"
+  body:
+    type: json
+    data: |2-
+        {
+          "id": 52,
+          "street": "Main Street",
+          "streetNumber": 1,
+          "postalCode": 11000,
+          "city": "Prague",
+          "countryCode": "CZE"
+        }
+  auth: inherit
+
+runtime:
+  variables:
+    - name: id
+      value: "1"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

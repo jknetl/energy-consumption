@@ -1,0 +1,22 @@
+info:
+  name: deleteReading
+  type: http
+  seq: 5
+
+http:
+  method: DELETE
+  url: "{{backendBaseUrl}}/api/meters/{{meterId}}/readings/{{id}}"
+  auth: inherit
+
+runtime:
+  variables:
+    - name: id
+      value: "1"
+    - name: meterId
+      value: "1"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
